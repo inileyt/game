@@ -1,4 +1,5 @@
 # Bitwood — a pixel coding adventure
+https://inileyt.github.io/game/
 
 A small website for learning to code, styled like a 2D pixel game.
 
