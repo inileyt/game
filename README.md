@@ -4,8 +4,8 @@ A small website for learning to code, styled like a 2D pixel game.
 
 - **Home** (`index.html`) — animated 2D pixel adventure background (parallax sky, mountains, castle,
   forest, coins, slimes and a running hero — press <kbd>Space</kbd> or tap to jump) with a **START** button.
-- **World map** (`levels.html`) — an animated pixel island with the **5 levels**; levels unlock one after another.
-- **Level** (`level.html?id=1…5`) — a short lesson, a code editor with syntax highlighting and hidden tests
+- **World map** (`levels.html`) — an animated pixel island with the **10 levels**; levels unlock one after another.
+- **Level** (`level.html?id=1…10`) — a short lesson, a code editor with syntax highlighting and hidden tests
   that run your JavaScript in a sandboxed Web Worker. Clear a level to earn XP and up to 3 stars.
 
 | # | World | Topic |
@@ -14,9 +14,21 @@ A small website for learning to code, styled like a 2D pixel game.
 | 2 | Loop Forest | Loops |
 | 3 | Condition Caves | If / else |
 | 4 | Array Rapids | Arrays |
-| 5 | Object Castle | Objects (boss level) |
+| 5 | Object Castle | Objects (mid-boss) |
+| 6 | Map Mesa | Arrow functions & map |
+| 7 | String Summit | String methods |
+| 8 | While Swamp | While loops |
+| 9 | Sort Volcano | Sorting arrays |
+| 10 | Star Citadel | Final boss — everything |
 
 Progress, XP and your code are saved in the browser (`localStorage`).
+
+## Founder & contact
+
+Founded by **Inna Babajanyan**
+
+- Email: [innababajanyan06@gmail.com](mailto:innababajanyan06@gmail.com)
+- Phone: [+374 93 186006](tel:+37493186006)
 
 ## Run it
 

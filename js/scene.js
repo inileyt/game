@@ -59,6 +59,51 @@
       hill: ["#2e1065", "#3b1480"], meadow: "#24104f", tree: ["#1e0b3a", "#2e1065"],
       grass: ["#a78bfa", "#7c3aed", "#5b21b6"], dirt: ["#3b0764", "#581c87", "#2e0550"],
       castle: ["#17082b", "#fde047"], flowers: ["#fb7185", "#fde047", "#f0abfc"], bigCastle: true, fireflies: true
+    },
+    desert: {
+      sky: ["#1e3a8a", "#2a4fa0", "#3b66b5", "#5280c4", "#709bd0", "#93b4d8", "#b9c9d6", "#dccfb8", "#f2cf98", "#fbbf6e"],
+      stars: false, sun: ["#fffbe0", "#fde047", "#fb923c"],
+      cloud: ["#fff7ed", "#fed7aa"],
+      far: ["#c2763a", "#d2884a", "#fde4c4"], near: ["#9a4f23", "#b0602d", "#fcd9b0"],
+      hill: ["#d97706", "#f59e0b"], meadow: "#b45309", tree: ["#3f6212", "#65a30d"],
+      grass: ["#fde68a", "#fbbf24", "#d97706"], dirt: ["#b45309", "#d97706", "#92400e"],
+      castle: ["#7c2d12", "#fde047"], flowers: ["#ef4444", "#fde047", "#f97316"], cactus: true
+    },
+    snow: {
+      sky: ["#0f2a4a", "#16385e", "#1f4873", "#2b5a88", "#3a6d9c", "#4f82ae", "#6997bf", "#87adcf", "#a9c5de", "#cfe0ee"],
+      stars: false, sun: ["#ffffff", "#e0f2fe", "#bae6fd"],
+      cloud: ["#f8fafc", "#cbd5e1"],
+      far: ["#8aa4c8", "#a3bbd9", "#ffffff"], near: ["#5d7fa8", "#7393bb", "#f8fafc"],
+      hill: ["#cbd5e1", "#e2e8f0"], meadow: "#b8c6d8", tree: ["#1e4d3a", "#e2e8f0"],
+      grass: ["#ffffff", "#e2e8f0", "#cbd5e1"], dirt: ["#64748b", "#94a3b8", "#475569"],
+      castle: ["#334155", "#7dd3fc"], flowers: ["#7dd3fc", "#ffffff", "#c4b5fd"], weather: "snow"
+    },
+    swamp: {
+      sky: ["#1a2e1a", "#213a22", "#29472a", "#325432", "#3c613a", "#476e42", "#537b4b", "#618854", "#70955e", "#80a269"],
+      stars: false, moon: true, sun: ["#f7fee7", "#d9f99d", "#a3e635"],
+      cloud: ["#6b8f5e", "#4d6b43"],
+      far: ["#3d5a3a", "#466844", "#c6d9b8"], near: ["#2c4a2c", "#355735", "#a8c49a"],
+      hill: ["#365314", "#4d7c0f"], meadow: "#2f4a10", tree: ["#1a2e05", "#365314"],
+      grass: ["#84cc16", "#65a30d", "#3f6212"], dirt: ["#3b3a1e", "#57532a", "#26240f"],
+      castle: ["#1a2e05", "#bef264"], flowers: ["#bef264", "#facc15", "#f0abfc"], fireflies: true, dense: true, water: true
+    },
+    volcano: {
+      sky: ["#1c0a0a", "#2a0e0c", "#3b120e", "#4d1710", "#611c12", "#762314", "#8c2b15", "#a33616", "#ba4517", "#d45a18"],
+      stars: true, moon: true, sun: ["#fff1e6", "#fdba74", "#f97316"],
+      cloud: ["#4a1d14", "#33130d"],
+      far: ["#3b1610", "#4a1c14", "#f97316"], near: ["#2a0f0b", "#381510", "#fb923c"],
+      hill: ["#1c0a08", "#2e120d"], meadow: "#170806", tree: ["#0c0504", "#3b1610"],
+      grass: ["#f97316", "#c2410c", "#7c2d12"], dirt: ["#292524", "#44403c", "#1c1917"],
+      castle: ["#0c0504", "#fb923c"], flowers: ["#fde047", "#f97316", "#ef4444"], weather: "embers"
+    },
+    space: {
+      sky: ["#02010a", "#050318", "#080526", "#0c0834", "#110b42", "#170f50", "#1e135e", "#26186c", "#2f1d7a", "#3a2388"],
+      stars: true, moon: true, sun: ["#f5f3ff", "#c4b5fd", "#8b5cf6"],
+      cloud: ["#2e1d6b", "#1f1450"],
+      far: ["#2a1d6b", "#36267f", "#e0e7ff"], near: ["#1c1350", "#251a63", "#c7d2fe"],
+      hill: ["#0f0a33", "#1a1250"], meadow: "#0c082a", tree: ["#1e1b4b", "#6366f1"],
+      grass: ["#818cf8", "#6366f1", "#4338ca"], dirt: ["#1e1b4b", "#312e81", "#0f0a33"],
+      castle: ["#0c082a", "#fde047"], flowers: ["#f0abfc", "#67e8f9", "#fde047"], bigCastle: true, crystals: true, fireflies: true
     }
   };
 
@@ -111,6 +156,10 @@
       const nc = Math.max(3, Math.round(W / 70));
       for (let i = 0; i < nc; i++) {
         this.clouds.push({ x: hash(i * 4.4 + 1) * (W + 80), y: 6 + hash(i * 2.2 + 5) * this.gy * 0.35, w: 14 + (hash(i * 6.6) * 26) | 0, v: 1.5 + hash(i) * 2 });
+      }
+      this.weather = [];
+      if (this.theme.weather) {
+        for (let i = 0; i < Math.round(W * H / 260); i++) this.weather.push({ x: hash(i * 6.1 + 2) * W, y: hash(i * 3.9 + 7) * H, v: 0.6 + hash(i * 1.7) * 0.8, p: hash(i * 4.3) * 6.28 });
       }
       this.fireflies = [];
       if (this.theme.fireflies) {
@@ -256,6 +305,26 @@
       for (let r = 0; r < h; r++) { const hw = Math.max(1, Math.floor((h - r) / 3)); ctx.fillRect(x - hw, base - r, hw * 2, 1); }
       ctx.fillStyle = "#cffafe";
       ctx.fillRect(x - 1, base - h + 2, 1, Math.floor(h / 2));
+    }
+
+    drawCactus(x, base, h) {
+      const { ctx } = this;
+      ctx.fillStyle = "#3f6212"; ctx.fillRect(x - 1, base - h, 3, h + 1);
+      ctx.fillRect(x - 4, base - h + 3, 2, 3); ctx.fillRect(x - 3, base - h + 5, 2, 1);
+      ctx.fillRect(x + 3, base - h + 2, 2, 3); ctx.fillRect(x + 2, base - h + 4, 2, 1);
+      ctx.fillStyle = "#65a30d"; ctx.fillRect(x - 1, base - h, 1, h);
+    }
+
+    drawWeather() {
+      if (!this.weather.length) return;
+      const { ctx, W, H, t } = this, snow = this.theme.weather === "snow";
+      for (const f of this.weather) {
+        let x, y;
+        if (snow) { x = f.x - t * 6 * f.v + Math.sin(t + f.p) * 3; y = f.y + t * 14 * f.v; ctx.fillStyle = f.v > 1.1 ? "#ffffff" : "#e2e8f0"; }
+        else { x = f.x + Math.sin(t * 2 + f.p) * 2; y = f.y - t * 16 * f.v; ctx.fillStyle = Math.sin(t * 5 + f.p) > 0 ? "#fdba74" : "#f97316"; }
+        x = ((x % W) + W) % W; y = ((y % H) + H) % H;
+        ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+      }
     }
 
     drawGround() {
@@ -454,6 +523,7 @@
         if (!th.dense && r < 0.3) continue;
         const wx = k * spacing + r * spacing * 0.6, sx = Math.round(wx - offT);
         if (th.crystals && r > 0.6) this.drawCrystal(sx, gy - 2, 6 + ((r * 10) | 0));
+        else if (th.cactus) this.drawCactus(sx, gy - 2, 6 + ((r * 9) | 0));
         else this.drawTree(sx, gy - 2, Math.round((10 + r * 14) * Math.max(0.8, H / 200)));
       }
       // fireflies
@@ -481,6 +551,7 @@
         ctx.fillRect(this.hx + 6 - shw / 2, gy, shw, 1);
         ctx.drawImage(sprite(name), this.hx, hy);
       }
+      this.drawWeather();
       // particles
       for (const p of this.particles) {
         ctx.globalAlpha = Math.min(1, p.life * 2);

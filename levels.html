@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>World Map — Bitwood</title>
-  <meta name="description" content="Explore the pixel island of Bitwood and pick one of five JavaScript coding levels.">
+  <meta name="description" content="Explore the pixel island of Bitwood and pick one of ten JavaScript coding levels.">
   <meta name="theme-color" content="#020617">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
         <a class="btn btn-ghost is-active" href="levels.html" aria-current="page">World map</a>
         <a class="btn btn-ghost" href="index.html#quests">Quests</a>
         <a class="btn btn-ghost" href="index.html#how">How to play</a>
+        <a class="btn btn-ghost" href="index.html#contact">Contact</a>
       </nav>
       <div class="nav-right">
         <span class="xp-chip" title="Your experience points"><img data-sprite="star" data-scale="2" alt=""><span data-xp>0</span> XP</span>
@@ -39,17 +40,17 @@
     <section class="page-head container">
       <span class="eyebrow"><span class="blink-star" aria-hidden="true"></span>World map<span class="blink-star" aria-hidden="true"></span></span>
       <h1>The Isle of Bitwood</h1>
-      <p>Five worlds, five coding quests. Clear a level to open the path to the next one. Click a level to see what waits there.</p>
+      <p>Ten worlds, ten coding quests. Clear a level to open the path to the next one. Click a level to see what waits there.</p>
       <div class="progress-row" aria-label="Your progress">
         <div class="xp-bar" role="presentation"><i id="xp-fill"></i></div>
-        <span class="xp-text" id="xp-text">0 / 1000 XP</span>
+        <span class="xp-text" id="xp-text">0 / 3300 XP</span>
       </div>
     </section>
 
     <section class="container" aria-label="Map">
       <div class="map-wrap" data-reveal>
         <div class="pixel-box map-frame" id="map-frame">
-          <canvas id="map" role="img" aria-label="Pixel island map with five level locations connected by a path"></canvas>
+          <canvas id="map" role="img" aria-label="Pixel island map with ten level locations connected by a path"></canvas>
           <div class="map-hero" id="map-hero" aria-hidden="true"><img data-sprite="heroA" data-scale="4" alt=""></div>
         </div>
       </div>
@@ -85,6 +86,7 @@
         <div>
           <a class="brand" href="index.html"><img class="brand-mark" data-sprite="coin0" data-scale="4" alt=""><span class="brand-name">Bitwood</span></a>
           <p style="margin-top:12px;font-size:15px;max-width:320px">A tiny pixel world for learning to code. Made for curious beginners of every age.</p>
+          <p style="margin-top:10px;font-size:15px">Founder: <b style="color:#f8fafc">Inna Babajanyan</b></p>
         </div>
         <div>
           <h4>Play</h4>
@@ -92,15 +94,19 @@
         </div>
         <div>
           <h4>Worlds</h4>
-          <ul><li><a href="level.html?id=1">Variable Village</a></li><li><a href="level.html?id=2">Loop Forest</a></li><li><a href="level.html?id=3">Condition Caves</a></li></ul>
+          <ul><li><a href="level.html?id=1">Variable Village</a></li><li><a href="level.html?id=5">Object Castle</a></li><li><a href="level.html?id=10">Star Citadel</a></li></ul>
         </div>
         <div>
-          <h4>More</h4>
-          <ul><li><a href="level.html?id=4">Array Rapids</a></li><li><a href="level.html?id=5">Object Castle</a></li><li><a href="index.html#quests">All quests</a></li></ul>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:innababajanyan06@gmail.com">innababajanyan06@gmail.com</a></li>
+            <li><a href="tel:+37493186006">+374 93 186006</a></li>
+            <li><a href="index.html#contact">Meet the founder</a></li>
+          </ul>
         </div>
       </div>
       <div class="fine">
-        <p>© <span data-year>2026</span> Bitwood. All pixels hand-placed.</p>
+        <p>© <span data-year>2026</span> Bitwood · Founded by Inna Babajanyan. All pixels hand-placed.</p>
         <p>Made with <img class="heart pixelated" data-sprite="heart" data-scale="2" alt="love"> and JavaScript</p>
       </div>
     </div>

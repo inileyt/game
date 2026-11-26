@@ -270,7 +270,7 @@
     const last = level.id === LEVELS.length;
     document.getElementById("win-title").textContent = last ? "Boss defeated!" : "Level clear!";
     document.getElementById("win-text").textContent = last
-      ? "You conquered all five worlds of Bitwood. You're a real coder now!"
+      ? "You conquered all ten worlds of Bitwood. You're a real coder now!"
       : "The path to " + LEVELS[level.id].name + " is open.";
     document.getElementById("win-xp").textContent = already ? "Replay complete" : "+" + level.xp + " XP";
     const next = document.getElementById("win-next");

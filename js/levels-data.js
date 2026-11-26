@@ -1,4 +1,4 @@
-/* The five Bitwood levels — each one teaches a JavaScript idea and ends with a coding challenge. */
+/* The ten Bitwood levels — each one teaches a JavaScript idea and ends with a coding challenge. */
 window.BITWOOD_LEVELS = [
   {
     id: 1,
@@ -118,16 +118,16 @@ window.BITWOOD_LEVELS = [
     theme: "castle",
     color: "#ff7286",
     icon: "crown",
-    topic: "Objects — boss level",
+    topic: "Objects — mid-boss",
     xp: 300,
-    blurb: "The final boss guards a treasure room. Count the loot with objects.",
+    blurb: "A knight guards the castle treasure room. Count the loot with objects.",
     lesson: [
       { p: "An <b>object</b> groups related values under names called <b>keys</b>. Read a value with a dot: <code>item.price</code>." },
       { code: "const potion = { name: \"potion\", price: 5, qty: 2 };\npotion.name;   // \"potion\"\npotion.price * potion.qty; // 10" },
       { p: "Real inventories are <b>arrays of objects</b>. Loop through them and combine what you learned in every level so far." },
       { code: "const loot = [\n  { name: \"potion\", price: 5, qty: 2 },\n  { name: \"sword\", price: 30, qty: 1 }\n];\nfor (const item of loot) {\n  console.log(item.name, item.qty);\n}" }
     ],
-    task: "Boss fight! Write <code>lootValue(inventory)</code> that returns the total value of an array of items, where each item is worth <code>price * qty</code>.",
+    task: "Mid-boss fight! Write <code>lootValue(inventory)</code> that returns the total value of an array of items, where each item is worth <code>price * qty</code>.",
     fn: "lootValue",
     starter: "function lootValue(inventory) {\n  // Add up price * qty for every item\n  \n}\n",
     hint: "Keep a <code>let total = 0;</code>, loop with <code>for (const item of inventory)</code>, add <code>item.price * item.qty</code>, then <code>return total;</code>",
@@ -136,6 +136,144 @@ window.BITWOOD_LEVELS = [
       { args: [[]], expected: 0 },
       { args: [[{ name: "gem", price: 12, qty: 3 }]], expected: 36 },
       { args: [[{ name: "map", price: 0, qty: 9 }, { name: "crown", price: 100, qty: 1 }]], expected: 100 }
+    ]
+  },
+  {
+    id: 6,
+    slug: "map-mesa",
+    name: "Map Mesa",
+    theme: "desert",
+    color: "#fbbf24",
+    icon: "sword",
+    topic: "Arrow functions & map",
+    xp: 350,
+    blurb: "Sun-baked canyons where one spell changes every item at once: map.",
+    lesson: [
+      { p: "An <b>arrow function</b> is a short way to write a function. If the body is a single expression, its value is returned automatically." },
+      { code: "const add = (a, b) => a + b;\nconst square = n => n * n;\nsquare(4); // 16" },
+      { p: "<code>.map()</code> runs a function on every item of an array and gives you a <b>new</b> array with the results. The original array stays the same." },
+      { code: "const hp = [10, 20, 30];\nconst healed = hp.map(n => n + 5);\n// healed is [15, 25, 35]\n// hp is still [10, 20, 30]" }
+    ],
+    task: "Write <code>doubleAll(nums)</code> that returns a new array with every number doubled. <code>doubleAll([1, 2, 3])</code> returns <code>[2, 4, 6]</code>.",
+    fn: "doubleAll",
+    starter: "function doubleAll(nums) {\n  // Return a NEW array with every number doubled\n  \n}\n",
+    hint: "One line: <code>return nums.map(n =&gt; n * 2);</code>",
+    tests: [
+      { args: [[1, 2, 3]], expected: [2, 4, 6] },
+      { args: [[]], expected: [] },
+      { args: [[-4, 0, 10]], expected: [-8, 0, 20] },
+      { args: [[0.5]], expected: [1] }
+    ]
+  },
+  {
+    id: 7,
+    slug: "string-summit",
+    name: "String Summit",
+    theme: "snow",
+    color: "#7dd3fc",
+    icon: "gem",
+    topic: "String methods",
+    xp: 400,
+    blurb: "Snowy peaks where words echo back. Bend strings with built-in methods.",
+    lesson: [
+      { p: "Strings come with handy <b>methods</b>. <code>.toLowerCase()</code> and <code>.toUpperCase()</code> change the case, and <code>.length</code> counts the letters." },
+      { code: "const word = \"Echo\";\nword.toLowerCase(); // \"echo\"\nword.length;        // 4" },
+      { p: "To flip a string: <code>.split(\"\")</code> turns it into an array of letters, <code>.reverse()</code> flips the array, and <code>.join(\"\")</code> glues it back together." },
+      { code: "const letters = \"snow\".split(\"\");\n// [\"s\", \"n\", \"o\", \"w\"]\nletters.reverse().join(\"\"); // \"wons\"" }
+    ],
+    task: "Write <code>isPalindrome(word)</code> that returns <code>true</code> if the word reads the same forwards and backwards, ignoring upper/lower case (<code>\"Racecar\"</code> → <code>true</code>), otherwise <code>false</code>.",
+    fn: "isPalindrome",
+    starter: "function isPalindrome(word) {\n  // Lower-case it, reverse it, compare\n  \n}\n",
+    hint: "<code>const w = word.toLowerCase();</code> then <code>return w === w.split(\"\").reverse().join(\"\");</code>",
+    tests: [
+      { args: ["level"], expected: true },
+      { args: ["Racecar"], expected: true },
+      { args: ["pixel"], expected: false },
+      { args: ["a"], expected: true },
+      { args: ["Noon"], expected: true },
+      { args: ["ab"], expected: false }
+    ]
+  },
+  {
+    id: 8,
+    slug: "while-swamp",
+    name: "While Swamp",
+    theme: "swamp",
+    color: "#84cc16",
+    icon: "potion",
+    topic: "While loops",
+    xp: 450,
+    blurb: "Murky waters where you keep going until something changes: while loops.",
+    lesson: [
+      { p: "A <code>while</code> loop repeats <b>as long as</b> its condition is true. Make sure something inside the loop changes, or it will never stop!" },
+      { code: "let fuel = 3;\nwhile (fuel > 0) {\n  console.log(\"Vroom\", fuel);\n  fuel--; // fuel goes down by 1\n}" },
+      { p: "Use <code>.push()</code> to add an item to the end of an array while you loop." },
+      { code: "const steps = [];\nsteps.push(\"left\");\nsteps.push(\"right\");\n// steps is [\"left\", \"right\"]" }
+    ],
+    task: "Write <code>countdown(n)</code> that returns an array counting down from <code>n</code> to <code>1</code>, then <code>\"GO!\"</code>. <code>countdown(3)</code> returns <code>[3, 2, 1, \"GO!\"]</code>, and <code>countdown(0)</code> returns <code>[\"GO!\"]</code>.",
+    fn: "countdown",
+    starter: "function countdown(n) {\n  const result = [];\n  // While n is above 0, push it and count down\n  \n  return result;\n}\n",
+    hint: "<code>while (n &gt; 0) { result.push(n); n--; }</code> and then <code>result.push(\"GO!\");</code> before the return.",
+    tests: [
+      { args: [3], expected: [3, 2, 1, "GO!"] },
+      { args: [1], expected: [1, "GO!"] },
+      { args: [0], expected: ["GO!"] },
+      { args: [5], expected: [5, 4, 3, 2, 1, "GO!"] }
+    ]
+  },
+  {
+    id: 9,
+    slug: "sort-volcano",
+    name: "Sort Volcano",
+    theme: "volcano",
+    color: "#f97316",
+    icon: "flag",
+    topic: "Sorting arrays",
+    xp: 500,
+    blurb: "Lava-hot leaderboards. Put scores in order without burning the original.",
+    lesson: [
+      { p: "<code>.sort()</code> puts an array in order — but by default it sorts like <b>text</b>, so <code>100</code> comes before <code>25</code>! Give it a compare function to sort numbers." },
+      { code: "[100, 25, 3].sort();               // [100, 25, 3]  oops\n[100, 25, 3].sort((a, b) => a - b); // [3, 25, 100]" },
+      { p: "<code>.sort()</code> also changes the original array. Make a copy first with the spread operator <code>[...arr]</code> so the original stays safe." },
+      { code: "const scores = [9, 4, 7];\nconst sorted = [...scores].sort((a, b) => a - b);\n// sorted is [4, 7, 9], scores is still [9, 4, 7]" }
+    ],
+    task: "Write <code>sortScores(scores)</code> that returns a new array of the numbers sorted from lowest to highest. <code>sortScores([100, 25, 3, 7])</code> returns <code>[3, 7, 25, 100]</code>.",
+    fn: "sortScores",
+    starter: "function sortScores(scores) {\n  // Copy the array, then sort numbers from low to high\n  \n}\n",
+    hint: "<code>return [...scores].sort((a, b) =&gt; a - b);</code>",
+    tests: [
+      { args: [[10, 2, 33]], expected: [2, 10, 33] },
+      { args: [[100, 25, 3, 7]], expected: [3, 7, 25, 100] },
+      { args: [[]], expected: [] },
+      { args: [[5, 5, 1]], expected: [1, 5, 5] }
+    ]
+  },
+  {
+    id: 10,
+    slug: "star-citadel",
+    name: "Star Citadel",
+    theme: "space",
+    color: "#c084fc",
+    icon: "crown",
+    topic: "Final boss — everything",
+    xp: 600,
+    blurb: "The final boss floats among the stars. Use every skill you've learned to win.",
+    lesson: [
+      { p: "This is it — the <b>final boss</b>. You'll need arrays, objects, loops and if-statements all at once." },
+      { code: "const players = [\n  { name: \"Ada\", xp: 120 },\n  { name: \"Lin\", xp: 300 }\n];\nplayers[1].name; // \"Lin\"" },
+      { p: "To find the best item, keep track of the <b>best so far</b>. Start with <code>null</code>, then replace it whenever you find something better. Use <code>&gt;</code> (not <code>&gt;=</code>) so that on a tie the first one wins." },
+      { code: "let best = null;\nfor (const p of players) {\n  if (best === null || p.xp > best.xp) {\n    best = p;\n  }\n}" }
+    ],
+    task: "Write <code>topPlayer(players)</code> that returns the <b>name</b> of the player with the most <code>xp</code>. On a tie, return the first one. If the array is empty, return <code>null</code>.",
+    fn: "topPlayer",
+    starter: "function topPlayer(players) {\n  // Track the best player so far\n  \n}\n",
+    hint: "Use the pattern from the lesson, then finish with <code>return best === null ? null : best.name;</code>",
+    tests: [
+      { args: [[{ name: "Ada", xp: 120 }, { name: "Lin", xp: 300 }, { name: "Max", xp: 90 }]], expected: "Lin" },
+      { args: [[]], expected: null },
+      { args: [[{ name: "Solo", xp: 1 }]], expected: "Solo" },
+      { args: [[{ name: "A", xp: 50 }, { name: "B", xp: 50 }]], expected: "A" },
+      { args: [[{ name: "Neg", xp: -5 }, { name: "Zero", xp: 0 }]], expected: "Zero" }
     ]
   }
 ];
