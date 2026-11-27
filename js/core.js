@@ -266,62 +266,27 @@
   };
 
   /* ------------------------------------------------------------------ *
-   * Pixel page transition
+   * Page transitions: the page content fades in softly (CSS, see .page-in),
+   * and after clicking a link a thin pixel loading bar runs along the top
+   * while the next page loads. Nothing ever covers or blocks the page.
    * ------------------------------------------------------------------ */
   const Wipe = (function () {
-    let canvas, ctx, cells = [], cols = 0, rows = 0, size = 40, raf = 0;
-    const COLORS = ["#020617", "#020617", "#020617", "#0a0f3d", "#0f172a"];
-    function setup() {
-      canvas = document.createElement("canvas");
-      canvas.className = "pixel-wipe";
-      canvas.setAttribute("aria-hidden", "true");
-      document.body.appendChild(canvas);
-      ctx = canvas.getContext("2d");
-      resize();
-    }
-    function resize() {
-      const w = window.innerWidth, h = window.innerHeight;
-      size = w < 640 ? 28 : 40;
-      cols = Math.ceil(w / size); rows = Math.ceil(h / size);
-      canvas.width = cols * size; canvas.height = rows * size;
-      canvas.style.width = canvas.width + "px"; canvas.style.height = canvas.height + "px";
-      cells = [];
-      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-        cells.push({ x, y, order: (x + y) / (cols + rows) * 0.7 + Math.random() * 0.3, color: COLORS[(Math.random() * COLORS.length) | 0] });
+    let bar = null;
+    function showBar() {
+      if (reduceMotion) return;
+      if (!bar) {
+        bar = document.createElement("div");
+        bar.className = "load-bar";
+        bar.setAttribute("aria-hidden", "true");
+        document.body.appendChild(bar);
       }
+      bar.classList.remove("is-on"); void bar.offsetWidth; bar.classList.add("is-on");
     }
-    function draw(t, mode) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const c of cells) {
-        const covered = mode === "out" ? c.order > t : c.order <= t;
-        if (covered) { ctx.fillStyle = c.color; ctx.fillRect(c.x * size, c.y * size, size, size); }
-      }
-    }
-    function run(mode, duration, done) {
-      cancelAnimationFrame(raf);
-      const start = performance.now();
-      canvas.classList.add("is-blocking");
-      (function frame(now) {
-        const t = Math.min(1, (now - start) / duration);
-        draw(t, mode);
-        if (t < 1) raf = requestAnimationFrame(frame);
-        else {
-          if (mode === "out") { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.classList.remove("is-blocking"); }
-          if (done) done();
-        }
-      })(start);
-    }
+    function hideBar() { if (bar) bar.classList.remove("is-on"); }
     return {
       init() {
-        if (reduceMotion) return;
-        setup();
-        // reveal: start fully covered then dissolve
-        draw(-1, "out");
-        run("out", 520);
-        window.addEventListener("resize", () => { resize(); });
-        window.addEventListener("pageshow", e => {
-          if (e.persisted) { cancelAnimationFrame(raf); ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.classList.remove("is-blocking"); }
-        });
+        document.documentElement.classList.add("page-in");
+        window.addEventListener("pageshow", e => { if (e.persisted) hideBar(); });
         document.addEventListener("click", e => {
           const a = e.target.closest("a[href]");
           if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -329,15 +294,11 @@
           if (a.hasAttribute("download")) return;
           const url = new URL(a.href, location.href);
           if (url.origin !== location.origin) return;
-          if (url.pathname === location.pathname && url.search === location.search && url.hash) return; // same-page anchor
-          e.preventDefault();
-          run("in", 420, () => { location.href = url.href; });
+          if (url.pathname === location.pathname && url.search === location.search) return; // same page / anchor
+          showBar(); // the browser navigates normally — no delay
         });
       },
-      go(href) {
-        if (reduceMotion || !canvas) { location.href = href; return; }
-        run("in", 420, () => { location.href = href; });
-      }
+      go(href) { showBar(); location.href = href; }
     };
   })();
 
