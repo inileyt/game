@@ -522,6 +522,100 @@
     return fresh;
   }
 
+  /* ------------------------------------------------------------------ *
+   * Contact links: mailto:/tel: only work when the device has a mail or
+   * phone app set up, so clicking them shows a small menu with options
+   * that always work (Gmail in the browser, WhatsApp, copy).
+   * ------------------------------------------------------------------ */
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? resolve() : reject(new Error("copy failed")); } catch (e) { reject(e); }
+      ta.remove();
+    });
+  }
+  let contactMenu = null;
+  function closeContactMenu(focusBack) {
+    if (!contactMenu) return;
+    const opener = contactMenu._opener;
+    contactMenu.remove();
+    contactMenu = null;
+    document.removeEventListener("keydown", onContactKey, true);
+    document.removeEventListener("pointerdown", onContactOutside, true);
+    if (focusBack && opener) opener.focus();
+  }
+  function onContactKey(e) {
+    if (!contactMenu) return;
+    if (e.key === "Escape") { e.preventDefault(); closeContactMenu(true); return; }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      const items = [...contactMenu.querySelectorAll("a, button")];
+      const i = items.indexOf(document.activeElement);
+      e.preventDefault();
+      items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1) + items.length) % items.length].focus();
+    }
+  }
+  function onContactOutside(e) { if (contactMenu && !contactMenu.contains(e.target) && e.target !== contactMenu._opener) closeContactMenu(false); }
+  function openContactMenu(link) {
+    closeContactMenu(false);
+    const href = link.getAttribute("href");
+    const isMail = href.startsWith("mailto:");
+    const value = decodeURIComponent(href.replace(/^(mailto|tel):/, "").split("?")[0]);
+    const digits = value.replace(/[^0-9]/g, "");
+    const shown = !isMail && /\d/.test(link.textContent) ? link.textContent.trim() : value;
+    const items = isMail ? [
+      { label: "Write in Gmail", icon: "scroll", href: "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(value), external: true },
+      { label: "Open email app", icon: "flag", href: href },
+      { label: "Copy email address", icon: "gem", copy: value }
+    ] : [
+      { label: "Call " + shown, icon: "heart", href: href },
+      { label: "Message on WhatsApp", icon: "scroll", href: "https://wa.me/" + digits, external: true },
+      { label: "Copy phone number", icon: "gem", copy: shown }
+    ];
+    const menu = document.createElement("div");
+    menu.className = "contact-menu pixel-box";
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", isMail ? "Email options" : "Phone options");
+    menu.innerHTML = '<p class="contact-menu-title">' + escapeHTML(isMail ? value : shown) + "</p>" + items.map((it, i) =>
+      (it.copy !== undefined
+        ? '<button type="button" role="menuitem" data-i="' + i + '">'
+        : '<a role="menuitem" href="' + escapeHTML(it.href) + '"' + (it.external ? ' target="_blank" rel="noopener noreferrer"' : "") + ">") +
+      '<img class="pixelated" alt="" src="' + spriteURL(it.icon, 2) + '"><span>' + escapeHTML(it.label) + "</span>" +
+      (it.copy !== undefined ? "</button>" : "</a>")).join("");
+    document.body.appendChild(menu);
+    menu._opener = link;
+    // position under the link, kept inside the viewport
+    const r = link.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
+    let left = Math.min(Math.max(8, r.left), window.innerWidth - mw - 8);
+    let top = r.bottom + 6;
+    if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 6);
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
+    menu.querySelectorAll("button[data-i]").forEach(btn => btn.addEventListener("click", () => {
+      const it = items[+btn.dataset.i];
+      copyText(it.copy).then(() => toast("<b>Copied!</b> " + escapeHTML(it.copy), "star"))
+        .catch(() => toast("Couldn't copy — please select it by hand: <b>" + escapeHTML(it.copy) + "</b>", "scroll"));
+      closeContactMenu(true);
+    }));
+    menu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => setTimeout(() => closeContactMenu(false), 0)));
+    contactMenu = menu;
+    document.addEventListener("keydown", onContactKey, true);
+    document.addEventListener("pointerdown", onContactOutside, true);
+    const first = menu.querySelector("a, button");
+    if (first) first.focus({ preventScroll: true });
+  }
+  document.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="mailto:"], a[href^="tel:"]');
+    if (!a || a.closest(".contact-menu") || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (contactMenu && contactMenu._opener === a) { closeContactMenu(true); return; }
+    openContactMenu(a);
+  });
+  window.addEventListener("resize", () => closeContactMenu(false));
+  window.addEventListener("scroll", () => closeContactMenu(false), { passive: true });
+
   window.Bitwood = { PAL, SPRITES, sprite, spriteURL, paintSprites, Store, Wipe, updateXP, initReveal, confetti, escapeHTML, reduceMotion, toast, openModal, BADGES, checkBadges };
 
   document.addEventListener("DOMContentLoaded", () => {

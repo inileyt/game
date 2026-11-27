@@ -887,3 +887,10 @@ input.blank.is-wrong { color: var(--pink); border: 2px solid var(--pink); backgr
 .order-built .order-piece { flex: 1; background: rgba(4, 45, 77, .5); animation: line-in .2s steps(3); }
 .order-built .order-piece.is-wrong { border-color: var(--pink); background: rgba(255, 114, 134, .12); animation: shake .3s steps(3); }
 .order-built.is-solved .order-piece { border-color: rgba(163, 230, 53, .6); cursor: default; transform: none; }
+
+/* ---------- Contact menu (email / phone options) ---------- */
+.contact-menu { position: fixed; z-index: 960; min-width: 240px; padding: 8px; display: flex; flex-direction: column; gap: 2px; animation: pop-in .2s steps(3); }
+.contact-menu-title { padding: 6px 10px 8px; font: 400 12px/1.4 var(--font-pixel-s) !important; letter-spacing: .08em !important; color: var(--color-subtle) !important; border-bottom: 2px solid var(--color-border); margin-bottom: 4px !important; word-break: break-all; }
+.contact-menu a, .contact-menu button { display: flex; align-items: center; gap: 10px; padding: 10px; width: 100%; text-align: left; font: 600 15px/1.3 var(--font-body); letter-spacing: .02em; color: #e2e8f0; }
+.contact-menu a:hover, .contact-menu button:hover, .contact-menu a:focus-visible, .contact-menu button:focus-visible { background: rgba(44, 186, 255, .14); color: #fff; outline: none; }
+.contact-menu img { width: 18px; height: auto; flex: none; }
