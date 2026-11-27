@@ -16,7 +16,11 @@ A small website for learning to code, styled like a 2D pixel game.
 - **Certificate** (`certificate.html`) — after all 10 levels, type your name and download a pixel certificate.
 - **Sound** — 8-bit sound effects and an original chiptune made live with the Web Audio API (toggle buttons
   in the menu; music is off until you turn it on).
-- **Contact form** — on the home page; it opens the visitor's email app with the message ready to send.
+- **Accounts & cloud save** — sign up / sign in (Supabase). XP, stars, badges, daily streak and code sync
+  between devices; progress still works without an account (saved in the browser).
+- **Leaderboard** (`leaderboard.html`) — top heroes by XP.
+- **Contact form** — on the home page; messages are saved in the Supabase `messages` table
+  (falls back to opening the visitor's email app if the database can't be reached).
 
 | # | World | Topic |
 |---|-------|-------|
@@ -32,6 +36,25 @@ A small website for learning to code, styled like a 2D pixel game.
 | 10 | Star Citadel | Final boss — everything |
 
 Progress, XP and your code are saved in the browser (`localStorage`).
+
+## Backend (Supabase)
+
+GitHub Pages only serves static files, so the backend is [Supabase](https://supabase.com) — the site talks
+to it directly from the browser. Connection values are in `js/config.js` (the publishable key is public by
+design; access is controlled by Row Level Security). **Never put a secret / `service_role` key in the code.**
+
+One-time setup in the Supabase dashboard:
+
+1. **SQL Editor → New query** → paste all of [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
+   This creates `profiles` (public leaderboard), `progress` (private cloud save) and `messages`
+   (contact form), with their security rules.
+2. **Authentication → URL Configuration**
+   - Site URL: `https://inileyt.github.io/game/`
+   - Redirect URLs: add `https://inileyt.github.io/game/**`
+3. Read contact messages in **Table Editor → messages**.
+
+Note: the free Supabase email sender only sends a few emails per hour (sign-up confirmations and password
+resets). For more, set up custom SMTP under **Authentication → Emails**.
 
 ## Founder & contact
 
