@@ -37,6 +37,7 @@
     yaml: { comment: HASH_COMMENT, string: DQ + "|" + SQ, keyword: "(?!)", builtin: "true|false|null", special: String.raw`[\w./-]+(?=:(?:\s|$))` },
     sql: { comment: String.raw`--[^\n]*`, string: SQ, keyword: "SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|JOIN|ON|ORDER|BY|DESC|ASC|LIMIT|CREATE|TABLE|INDEX|AND|OR|NOT|NULL|PRIMARY|KEY|REFERENCES", builtin: "(?!)", special: "(?!)" },
     json: { comment: "(?!)", string: DQ, keyword: "(?!)", builtin: "true|false|null", special: "(?!)" },
+    python: { comment: HASH_COMMENT, string: DQ + "|" + SQ, keyword: "def|return|if|elif|else|for|while|in|import|from|as|with|try|except|finally|class|break|continue|pass|and|or|not|lambda|is", builtin: "True|False|None|print|len|range|input|int|str|float|type|open|sorted|round", special: String.raw`\bf(?=["'])` },
     docker: { comment: HASH_COMMENT, string: DQ, keyword: "FROM|WORKDIR|COPY|RUN|EXPOSE|CMD|ENV|ARG|ENTRYPOINT", builtin: "(?!)", special: "(?!)" }
   });
   const TOKENS = {};

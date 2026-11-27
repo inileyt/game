@@ -38,6 +38,20 @@
     });
     return firstPass;
   }
+  const TIME_LIMIT = 600; // seconds for the timed challenge
+  const better = (a, b) => !b || a.score > b.score || (a.score === b.score && a.seconds < b.seconds);
+  function saveTimed(id, score, seconds) {
+    let improved = false;
+    B.Store.update(d => {
+      const c = d.courses[id] = d.courses[id] || { lessons: {} };
+      const t = c.timed || { attempts: 0 };
+      if (better({ score, seconds }, t.best !== undefined ? { score: t.best, seconds: t.bestTime } : null)) { t.best = score; t.bestTime = seconds; improved = true; }
+      t.attempts = (t.attempts || 0) + 1;
+      c.timed = t;
+    });
+    return improved;
+  }
+  const mmss = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
   const getCourse = () => COURSES.find(c => c.id === params.get("c")) || COURSES[0];
 
   /* shuffle a question's options; returns { options, answer } with the correct index remapped */
@@ -126,6 +140,7 @@
       html += "<h2>" + esc(s.h) + "</h2>";
       (s.p || []).forEach(p => { html += "<p>" + p + "</p>"; });
       if (s.code) html += '<pre class="ac-code"><code>' + B.Code.highlight(s.code, s.lang || "text") + "</code></pre>";
+      if (s.diagram) html += '<div class="diagram-slot" data-diagram="' + esc(s.diagram) + '"></div>';
     });
     html += '<div class="ac-points"><h3><img class="pixelated" alt="" src="' + B.spriteURL("star", 2) + '"> Key points</h3><ul>' + L.points.map(p => "<li>" + p + "</li>").join("") + "</ul></div>";
     html += '<section class="ac-checks" aria-labelledby="check-title"><h2 id="check-title">Check your understanding</h2><p class="ac-hint">Answer both questions to finish the lesson' + (isLessonDone(c.id, n) ? "" : " and earn +" + LESSON_XP + " XP") + ".</p>";
@@ -137,6 +152,8 @@
       (n > 1 ? '<a class="btn btn-code" href="lesson.html?c=' + c.id + "&l=" + (n - 1) + '">◀ Previous</a>' : "<span></span>") +
       (n < c.lessons.length ? '<a class="btn btn-code" href="lesson.html?c=' + c.id + "&l=" + (n + 1) + '">Next ▶</a>' : '<a class="btn btn-code" href="exam.html?c=' + c.id + '">Final exam ▶</a>') + "</nav>";
     $("ac-article").innerHTML = html;
+    if (B.Glossary) B.Glossary.link($("ac-article"));
+    if (B.Diagrams) B.Diagrams.mountAll($("ac-article"));
 
     // sidebar: all lessons
     $("ac-toc").innerHTML = "<h2>" + esc(c.name) + " lessons</h2><ol>" + c.lessons.map((l, i) =>
@@ -216,18 +233,40 @@
         "<h2>Final exam: " + esc(c.title) + "</h2>" +
         '<ul class="ac-rules"><li><b>' + c.exam.length + "</b> questions about all " + c.lessons.length + " lessons</li><li>Pass with <b>" + PASS + " / " + c.exam.length + "</b> (70%)</li><li>No time limit — you can go back and change answers</li><li>Passing gives <b>+" + EXAM_XP + " XP</b>, a badge and a certificate</li></ul>" +
         (e ? '<p class="ac-best">Best score: <b>' + e.best + " / " + c.exam.length + "</b>" + (e.passed ? " · passed ✓" : "") + " · attempts: " + e.attempts + "</p>" : "") +
-        '<button class="btn btn-start" type="button" id="ex-start"><span class="t-label">' + (e ? "Start again" : "Start exam") + "</span></button></div>";
-      $("ex-start").addEventListener("click", start);
+        '<div class="ac-row"><button class="btn btn-start" type="button" id="ex-start"><span class="t-label">' + (e ? "Start again" : "Start exam") + "</span></button>" +
+        '<button class="btn btn-code ex-timed-btn" type="button" id="ex-timed">⏱ Timed challenge · 10 min</button></div>' +
+        '<p class="ac-hint">Timed challenge: the same 20 questions against the clock. Fast passes go on the speed leaderboard!</p></div>' +
+        '<section class="pixel-box ac-panel ex-board" aria-labelledby="board-title"><h2 id="board-title">⏱ Fastest heroes — ' + esc(c.name) + '</h2><ol class="ex-board-list" id="ex-board"><li class="muted">Loading…</li></ol>' +
+        (progress(c.id).timed ? '<p class="ac-best">Your best timed run: <b>' + progress(c.id).timed.best + "/20</b> in <b>" + mmss(progress(c.id).timed.bestTime) + "</b></p>" : "") + "</section>";
+      $("ex-start").addEventListener("click", () => start(false));
+      $("ex-timed").addEventListener("click", () => start(true));
+      loadBoard();
+    }
+    async function loadBoard() {
+      const list = $("ex-board");
+      if (!list) return;
+      if (!B.Cloud || !B.Cloud.enabled) { list.innerHTML = '<li class="muted">The speed leaderboard is offline right now.</li>'; return; }
+      try {
+        const rows = await B.Cloud.timedBoard(c.id, 10);
+        const me = B.Cloud.user ? B.Cloud.user.id : null;
+        list.innerHTML = rows.length ? rows.map((r, i) => '<li class="' + (r.user_id === me ? "is-me" : "") + '"><span class="ex-rank">#' + (i + 1) + '</span><span class="ex-name">' + esc(r.username) + '</span><span class="ex-sc">' + r.score + '/20</span><span class="ex-time">' + mmss(r.seconds) + "</span></li>").join("")
+          : '<li class="muted">No timed runs yet — be the first!' + (B.Cloud.user ? "" : " (Sign in to appear here.)") + "</li>";
+      } catch (err) {
+        list.innerHTML = '<li class="muted">' + (/exam_records|PGRST/.test(err.message || "") ? "The speed leaderboard is being set up — check back soon!" : "Couldn't load the speed leaderboard.") + "</li>";
+      }
     }
 
-    let qs = [], answers = [], cur = 0;
-    function start() {
+    let qs = [], answers = [], cur = 0, timed = false, startedAt = 0, timer = 0;
+    function start(isTimed) {
+      timed = !!isTimed;
+      clearInterval(timer);
       qs = c.exam.map(q => Object.assign({}, q, shuffled(q))).sort(() => Math.random() - 0.5);
       answers = new Array(qs.length).fill(-1);
       cur = 0;
       root.innerHTML =
         '<div class="pixel-box ac-panel ex-panel">' +
         '<div class="ex-track" aria-hidden="true"><div class="ex-fill" id="ex-fill"></div><img class="pixelated ex-hero" id="ex-hero" alt="" src="' + B.spriteURL("heroA", 3) + '"><img class="pixelated ex-flag" alt="" src="' + B.spriteURL("flag", 3) + '"></div>' +
+        (timed ? '<div class="ex-timer" id="ex-timer" role="timer" aria-live="off">⏱ 10:00</div>' : "") +
         '<div class="ex-pips" id="ex-pips"></div>' +
         '<div class="ex-q" id="ex-q" aria-live="polite"></div>' +
         '<div class="ex-actions"><button class="btn btn-code" type="button" id="ex-back">◀ Back</button><span class="ex-count" id="ex-count"></span>' +
@@ -237,6 +276,20 @@
       $("ex-back").addEventListener("click", () => show(cur - 1));
       $("ex-next").addEventListener("click", () => { if (cur === qs.length - 1) confirmFinish(); else show(cur + 1); });
       document.addEventListener("keydown", examKeys);
+      startedAt = Date.now();
+      if (timed) {
+        const tick = () => {
+          const left = Math.max(0, TIME_LIMIT - Math.floor((Date.now() - startedAt) / 1000));
+          const el = $("ex-timer");
+          if (!el) { clearInterval(timer); return; }
+          el.textContent = "⏱ " + mmss(left);
+          el.classList.toggle("is-low", left <= 60);
+          if (left === 60) B.toast("<b>1 minute left!</b>", "heart");
+          if (left === 0) { clearInterval(timer); B.toast("<b>Time's up!</b> Unanswered questions count as wrong.", "heart"); finish(); }
+        };
+        timer = setInterval(tick, 250);
+        tick();
+      }
       show(0);
     }
     function examKeys(e) {
@@ -274,19 +327,24 @@
     }
     function confirmFinish() {
       const missing = answers.findIndex(a => a < 0);
-      if (missing >= 0) { B.toast("<b>Question " + (missing + 1) + "</b> isn't answered yet.", "scroll"); show(missing); return; }
+      if (missing >= 0 && !timed) { B.toast("<b>Question " + (missing + 1) + "</b> isn't answered yet.", "scroll"); show(missing); return; }
+      if (missing >= 0 && timed && !window.confirm("Some questions aren't answered yet. Finish anyway?")) { show(missing); return; }
       finish();
     }
     function finish() {
       document.removeEventListener("keydown", examKeys);
+      clearInterval(timer);
       const score = qs.reduce((s, q, i) => s + (answers[i] === q.answer ? 1 : 0), 0);
       const pass = score >= PASS;
+      const seconds = Math.min(TIME_LIMIT, Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
       const firstPass = saveExam(c.id, score);
+      const improved = timed ? saveTimed(c.id, score, seconds) : false;
       B.updateXP(firstPass);
       root.innerHTML =
         '<div class="pixel-box ac-panel ac-center ex-result ' + (pass ? "is-pass" : "is-fail") + '">' +
         '<img class="pixelated ac-big-ico" alt="" src="' + B.spriteURL(pass ? "trophy" : "heart", 6) + '">' +
         "<h2>" + (pass ? "You passed!" : "Not this time") + '</h2><p class="ex-score"><b>' + score + "</b> / " + qs.length + "</p>" +
+        (timed ? '<p class="ex-time-result">⏱ Time: <b>' + mmss(seconds) + "</b>" + (improved ? " · new personal best!" : "") + '</p><p class="ac-hint" id="ex-submit"></p>' : "") +
         "<p>" + (pass ? (firstPass ? "+" + EXAM_XP + " XP · badge unlocked · your certificate is ready!" : "Great job — another pass!") : "You need " + PASS + " correct answers to pass. Review the answers below, re-read the lessons and try again!") + "</p>" +
         '<div class="ac-row">' + (pass ? '<a class="btn btn-start" href="certificate.html?course=' + c.id + '"><span class="t-label">Get certificate</span></a>' : "") +
         '<button class="btn ' + (pass ? "btn-code" : "btn-start") + '" type="button" id="ex-retry">' + (pass ? "Retake" : '<span class="t-label">Try again</span>') + "</button>" +
@@ -296,14 +354,31 @@
           const ok = answers[i] === q.answer;
           return '<li class="' + (ok ? "ok" : "bad") + '"><p class="ac-q">' + q.q + "</p>" +
             (ok ? '<p class="rev-line ok">✓ ' + esc(q.options[q.answer]) + "</p>"
-              : '<p class="rev-line bad">✗ Your answer: ' + esc(q.options[answers[i]]) + '</p><p class="rev-line ok">✓ Correct: ' + esc(q.options[q.answer]) + "</p>") +
+              : '<p class="rev-line bad">✗ Your answer: ' + (answers[i] >= 0 ? esc(q.options[answers[i]]) : "(no answer)") + '</p><p class="rev-line ok">✓ Correct: ' + esc(q.options[q.answer]) + "</p>") +
             '<p class="rev-explain">' + q.explain + "</p></li>";
         }).join("") + "</ol></section>";
-      $("ex-retry").addEventListener("click", () => { start(); window.scrollTo({ top: root.offsetTop - 90, behavior: B.reduceMotion ? "auto" : "smooth" }); });
+      $("ex-retry").addEventListener("click", () => { start(timed); window.scrollTo({ top: root.offsetTop - 90, behavior: B.reduceMotion ? "auto" : "smooth" }); });
       if (B.Sound) B.Sound.play(pass ? "win" : "fail");
       if (pass) { const r = root.getBoundingClientRect(); B.confetti(window.innerWidth / 2, Math.max(80, r.top), 160); }
       B.checkBadges();
       window.scrollTo({ top: root.offsetTop - 90, behavior: B.reduceMotion ? "auto" : "smooth" });
+      if (timed) submitTimed(score, seconds);
+    }
+    async function submitTimed(score, seconds) {
+      const el = $("ex-submit");
+      if (!el) return;
+      if (!B.Cloud || !B.Cloud.enabled) return;
+      if (!B.Cloud.user) {
+        el.innerHTML = '<button type="button" class="link-btn" id="ex-signin">Sign in</button> to put your timed runs on the speed leaderboard.';
+        $("ex-signin").addEventListener("click", () => B.Cloud.openAccount("signin"));
+        return;
+      }
+      try {
+        const res = await B.Cloud.submitTimed(c.id, score, seconds);
+        el.textContent = res === "saved" ? "🏆 Saved to the speed leaderboard!" : "Your best run on the speed leaderboard is still faster — keep trying!";
+      } catch (err) {
+        el.textContent = /exam_records|PGRST/.test(err.message || "") ? "The speed leaderboard is being set up — your run is saved on this device." : "Couldn't reach the speed leaderboard right now.";
+      }
     }
     intro();
   }

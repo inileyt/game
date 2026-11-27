@@ -15,7 +15,7 @@
       summary: "Developers and operations working as one team to ship fast and safely.",
       sections: [
         { h: "Dev + Ops", p: ["In the past, <b>developers</b> wrote code and threw it over a wall to <b>operations</b>, who had to run it. Releases were slow and scary. <b>DevOps</b> is a culture where both work together, automate everything they can, and share responsibility for the running system."] },
-        { h: "The DevOps loop", p: ["Code moves around an endless loop. Every step is automated as much as possible, so small changes can go live many times a day."],
+        { h: "The DevOps loop", diagram: "devops-loop", p: ["Code moves around an endless loop. Every step is automated as much as possible, so small changes can go live many times a day."],
           code: "plan → code → build → test → release → deploy → operate → monitor ─┐\n  ▲                                                                  │\n  └──────────────────────── feedback ◀───────────────────────────────┘", lang: "text" },
         { h: "Why it matters", p: ["Small, frequent releases are <b>safer</b> than giant ones: if something breaks, you know exactly which small change caused it and can roll it back quickly."] }
       ],
@@ -66,7 +66,7 @@
       summary: "Build and test every change automatically.",
       sections: [
         { h: "What is CI?", p: ["<b>Continuous Integration</b> means every push or pull request automatically <b>builds</b> the project and runs the <b>tests</b>. If something breaks, you know within minutes — before it reaches users."] },
-        { h: "A pipeline file", p: ["CI services like <b>GitHub Actions</b>, GitLab CI or Jenkins read a file in your repo that describes the steps."],
+        { h: "A pipeline file", diagram: "ci", p: ["CI services like <b>GitHub Actions</b>, GitLab CI or Jenkins read a file in your repo that describes the steps."],
           code: "# .github/workflows/ci.yml\nname: CI\non: [push, pull_request]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n      - run: npm ci\n      - run: npm test", lang: "yaml" },
         { h: "Keep it green", p: ["A failing (\"red\") pipeline should block merging. Fix it right away — a broken build slows down the whole team."] }
       ],
@@ -98,7 +98,7 @@
       summary: "Package your app with everything it needs, so it runs the same everywhere.",
       sections: [
         { h: "\"It works on my machine\"", p: ["Apps depend on a language version, libraries and settings. A <b>container</b> packages the app <i>with</i> all of that, so it runs the same on your laptop, in CI and on servers."] },
-        { h: "Images and containers", p: ["An <b>image</b> is the recipe/blueprint; a <b>container</b> is a running copy of it. You build images from a <b>Dockerfile</b>."],
+        { h: "Images and containers", diagram: "docker", p: ["An <b>image</b> is the recipe/blueprint; a <b>container</b> is a running copy of it. You build images from a <b>Dockerfile</b>."],
           code: "FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nEXPOSE 3000\nCMD [\"node\", \"server.js\"]", lang: "docker" },
         { h: "Running it", p: ["Build the image, then run a container and map a port from your computer to the container."],
           code: "docker build -t bitwood-api .\ndocker run -p 3000:3000 bitwood-api\ndocker ps            # list running containers", lang: "bash" }
@@ -117,7 +117,7 @@
         { h: "Why orchestration?", p: ["One container is easy. Hundreds across many servers need help: restarting crashed ones, spreading load, rolling out updates. An <b>orchestrator</b> like <b>Kubernetes</b> (K8s) does this for you."] },
         { h: "Key Kubernetes objects", p: ["A <b>Pod</b> runs one or more containers. A <b>Deployment</b> keeps the right number of pods running and updates them gradually. A <b>Service</b> gives pods a stable network address."],
           code: "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: bitwood-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: bitwood-api\n  template:\n    metadata:\n      labels:\n        app: bitwood-api\n    spec:\n      containers:\n        - name: api\n          image: bitwood-api:1.4\n          ports:\n            - containerPort: 3000", lang: "yaml" },
-        { h: "Desired state", p: ["You describe the <b>desired state</b> (\"3 replicas of version 1.4\") and Kubernetes keeps making reality match it. If a pod dies, it starts a new one."],
+        { h: "Desired state", diagram: "k8s", p: ["You describe the <b>desired state</b> (\"3 replicas of version 1.4\") and Kubernetes keeps making reality match it. If a pod dies, it starts a new one."],
           code: "kubectl apply -f deployment.yaml\nkubectl get pods", lang: "bash" }
       ],
       points: ["Kubernetes runs and heals containers across many servers.", "Pod → Deployment → Service.", "You declare the desired state; K8s keeps it true."],

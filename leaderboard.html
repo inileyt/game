@@ -64,6 +64,16 @@
         <p class="lb-note" id="lb-note" role="status" hidden></p>
         <p class="lb-me" id="lb-me" hidden></p>
       </div>
+
+      <section class="pixel-box lb-board lb-speed" aria-labelledby="speed-title">
+        <div class="lb-speed-head">
+          <h2 id="speed-title">⏱ Speed exams</h2>
+          <label class="sr-only" for="speed-course">Course</label>
+          <select id="speed-course" class="pg-select"></select>
+        </div>
+        <p class="lb-speed-lead">Fastest passes of the 10-minute timed Academy exams — score first, then time.</p>
+        <ol class="ex-board-list" id="speed-list"><li class="muted">Loading…</li></ol>
+      </section>
     </div>
   </main>
 
@@ -77,7 +87,7 @@
         </div>
         <div>
           <h4>Play</h4>
-          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="courses.html">Academy courses</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="leaderboard.html">Leaderboard</a></li><li><a href="certificate.html">Certificate</a></li></ul>
+          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="courses.html">Academy courses</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="leaderboard.html">Leaderboard</a></li><li><a href="certificate.html">Certificate</a></li></ul>
         </div>
         <div>
           <h4>Languages</h4>
@@ -104,6 +114,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
   <script src="js/config.js"></script>
   <script src="js/cloud.js"></script>
+  <script src="js/courses/frontend.js"></script>
+  <script src="js/courses/backend.js"></script>
+  <script src="js/courses/devops.js"></script>
+  <script src="js/courses/git.js"></script>
+  <script src="js/courses/python.js"></script>
+  <script src="js/courses/react.js"></script>
+  <script src="js/courses/security.js"></script>
+  <script src="js/courses/ai.js"></script>
   <script src="js/leaderboard.js"></script>
 </body>
 </html>

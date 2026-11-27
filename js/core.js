@@ -131,6 +131,8 @@
       "KNK.......",
       "KKK......."
     ],
+    shield: [".KKKKKKK.", "KBBBBWBBK", "KBBBBWBBK", "KBBBBWBBK", "KBBBBBBBK", ".KBBBBBK.", ".KBBBBBK.", "..KBBBK..", "...KBK...", "....K...."],
+    chip: ["..K.K.K...", ".KKKKKKK..", "KKMMMMMKK.", ".KMCCCMK..", "KKMCWCMKK.", ".KMCCCMK..", "KKMMMMMKK.", ".KKKKKKK..", "..K.K.K..."],
     medal: ["KK....KK", "KBK..KRK", ".KBKKRK.", "..KKKK..", ".KYYYYK.", "KYYWYYOK", "KYWYYYOK", "KYYYYYOK", ".KOOOOK.", "..KKKK.."],
     lock: ["..KKKK..", ".KMMMMK.", ".KM..MK.", "KKKKKKKK", "KYYYYYYK", "KYYKKYYK", "KYYKKYYK", "KOOOOOOK", "KKKKKKKK"],
     crown: ["K...KK...K", "KK.KYYK.KK", "KYKYYYYKYK", "KYYYRYYYYK", "KYYYYYYYYK", "KYCYYRYCYK", "KOOOOOOOOK", "KKKKKKKKKK"],
@@ -514,7 +516,14 @@
     { id: "frontend-grad", name: "Frontend Grad", icon: "gem", desc: "Pass the Frontend final exam.", test: d => passed(d, "frontend") },
     { id: "backend-grad", name: "Backend Grad", icon: "potion", desc: "Pass the Backend final exam.", test: d => passed(d, "backend") },
     { id: "devops-grad", name: "DevOps Grad", icon: "crown", desc: "Pass the DevOps final exam.", test: d => passed(d, "devops") },
-    { id: "scholar", name: "Scholar", icon: "scroll", desc: "Finish all 30 Academy lessons.", test: d => ["frontend", "backend", "devops"].every(c => Object.keys(((d.courses || {})[c] || {}).lessons || {}).length >= 10) },
+    { id: "git-grad", name: "Git Guru", icon: "flag", desc: "Pass the Git & GitHub final exam.", test: d => passed(d, "git") },
+    { id: "python-grad", name: "Pythonista", icon: "sword", desc: "Pass the Python final exam.", test: d => passed(d, "python") },
+    { id: "react-grad", name: "React Ranger", icon: "star", desc: "Pass the React final exam.", test: d => passed(d, "react") },
+    { id: "security-grad", name: "Cyber Guardian", icon: "shield", desc: "Pass the Cybersecurity final exam.", test: d => passed(d, "security") },
+    { id: "ai-grad", name: "AI Explorer", icon: "chip", desc: "Pass the AI basics final exam.", test: d => passed(d, "ai") },
+    { id: "speedrunner", name: "Speedrunner", icon: "heart", desc: "Pass a timed exam (20 questions in 10 minutes).", test: d => Object.values(d.courses || {}).some(c => c.timed && c.timed.best >= 14) },
+    { id: "academy-master", name: "Academy Master", icon: "trophy", desc: "Pass all 8 Academy final exams.", test: d => ["frontend", "backend", "devops", "git", "python", "react", "security", "ai"].every(c => passed(d, c)) },
+    { id: "scholar", name: "Scholar", icon: "scroll", desc: "Finish every lesson of the Frontend, Backend and DevOps courses.", test: d => ["frontend", "backend", "devops"].every(c => Object.keys(((d.courses || {})[c] || {}).lessons || {}).length >= 10) },
     { id: "daily-hero", name: "Daily Hero", icon: "scroll", desc: "Solve a daily challenge.", test: d => (d.daily.count || 0) >= 1 },
     { id: "on-fire", name: "On Fire", icon: "heart", desc: "Reach a 3-day daily streak.", test: d => (d.daily.best || 0) >= 3 },
     { id: "tinkerer", name: "Tinkerer", icon: "potion", desc: "Run your own code in the Playground.", test: d => (d.stats.playRuns || 0) >= 1 },
@@ -601,6 +610,7 @@
       (it.copy !== undefined ? "</button>" : "</a>")).join("");
     document.body.appendChild(menu);
     menu._opener = link;
+    menu._y = window.scrollY;
     // position under the link, kept inside the viewport
     const r = link.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
     let left = Math.min(Math.max(8, r.left), window.innerWidth - mw - 8);
@@ -629,7 +639,7 @@
     openContactMenu(a);
   });
   window.addEventListener("resize", () => closeContactMenu(false));
-  window.addEventListener("scroll", () => closeContactMenu(false), { passive: true });
+  window.addEventListener("scroll", () => { if (contactMenu && Math.abs(window.scrollY - contactMenu._y) > 60) closeContactMenu(false); }, { passive: true });
 
   window.Bitwood = { PAL, SPRITES, sprite, spriteURL, paintSprites, Store, Wipe, updateXP, initReveal, confetti, escapeHTML, reduceMotion, toast, openModal, BADGES, checkBadges };
 
