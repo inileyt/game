@@ -18,8 +18,8 @@ create table if not exists public.profiles (
   constraint username_length check (char_length(trim(username)) between 2 and 20),
   constraint username_no_html check (username !~ '[<>"&]'),
   constraint xp_range     check (xp between 0 and 1000000),
-  constraint stars_range  check (stars between 0 and 30),
-  constraint levels_range check (levels between 0 and 10),
+  constraint stars_range  check (stars between 0 and 60),
+  constraint levels_range check (levels between 0 and 20),
   constraint badges_range check (badges between 0 and 50)
 );
 create unique index if not exists profiles_username_unique on public.profiles (lower(username));

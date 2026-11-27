@@ -2,7 +2,9 @@
 (function () {
   "use strict";
   const B = window.Bitwood;
-  const LEVELS = window.BITWOOD_LEVELS;
+  const params = new URLSearchParams(location.search);
+  const TRACK = B.Tracks.byId(params.get("track") || "js");
+  const LEVELS = B.Tracks.levels(TRACK.id);
   const $ = id => document.getElementById(id);
   const W = 1600, H = 1130;
 
@@ -11,7 +13,8 @@
     const done = LEVELS.filter(l => d.done[l.id]);
     const stars = done.reduce((s, l) => s + (d.done[l.id].stars || 0), 0);
     const finished = done.length ? Math.max(...done.map(l => d.done[l.id].at || 0)) : Date.now();
-    return { done: done.length, stars, xp: B.Store.xp(), finished };
+    const xp = done.reduce((s, l) => s + l.xp, 0);
+    return { done: done.length, stars, xp, finished };
   }
 
   function drawSprite(g, name, x, y, scale) {
@@ -69,13 +72,13 @@
     // text
     drawSprite(g, "crown", W / 2 - 60, 92, 12);
     centerText(g, "CERTIFICATE", 290, "700 92px Silkscreen, monospace", "#facc15", "#042d4d");
-    centerText(g, "OF COMPLETION", 350, "700 36px Silkscreen, monospace", "#f8fafc");
+    centerText(g, TRACK.name.toUpperCase() + " · OF COMPLETION", 350, "700 36px Silkscreen, monospace", "#f8fafc");
     centerText(g, "This certifies that", 450, "500 32px Mulish, sans-serif", "#cbd5e1");
     const font = fitFont(g, name, "700", "Silkscreen, monospace", 88, W - 300);
     centerText(g, name, 560, font, "#ffffff", "#042d4d");
     g.fillStyle = "#facc15"; g.fillRect(W / 2 - 420, 590, 840, 6);
-    centerText(g, "has conquered all " + LEVELS.length + " worlds of Bitwood — the pixel coding adventure —", 660, "500 30px Mulish, sans-serif", "#e2e8f0");
-    centerText(g, "and learned variables, loops, conditions, arrays, objects, strings and sorting in JavaScript.", 705, "500 30px Mulish, sans-serif", "#e2e8f0");
+    centerText(g, "has conquered all " + LEVELS.length + " " + TRACK.name + " worlds of Bitwood — the pixel coding adventure —", 660, "500 30px Mulish, sans-serif", "#e2e8f0");
+    centerText(g, "and learned " + TRACK.topics + ".", 705, "500 30px Mulish, sans-serif", "#e2e8f0");
     centerText(g, "★ " + st.stars + " / " + LEVELS.length * 3 + " stars     ·     " + st.xp + " XP     ·     " + new Date(st.finished).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }), 785, "700 30px Silkscreen, monospace", "#a3e635");
 
     // signature
@@ -87,7 +90,19 @@
     drawSprite(g, "trophy", 150, H - 260, 12);
   }
 
+  function renderTabs() {
+    const wrap = $("cert-tabs");
+    if (!wrap) return;
+    wrap.innerHTML = B.Tracks.list.map(t => {
+      const ls = B.Tracks.levels(t.id), done = ls.filter(l => B.Store.isDone(l.id)).length;
+      return '<a class="track-tab' + (t.id === TRACK.id ? " is-active" : "") + '" href="certificate.html?track=' + t.id + '"' + (t.id === TRACK.id ? ' aria-current="page"' : "") +
+        ' style="--c:' + t.color + '"><img class="pixelated" alt="" src="' + B.spriteURL(t.icon, 3) + '"><span><b>' + B.escapeHTML(t.name) + "</b><small>" + (done === ls.length ? "Unlocked ✓" : done + " / " + ls.length + " levels") + "</small></span></a>";
+    }).join("");
+  }
+
   async function init() {
+    renderTabs();
+    document.title = TRACK.name + " Certificate — Bitwood";
     const st = stats();
     const locked = st.done < LEVELS.length;
     $("cert-locked").hidden = !locked;
@@ -117,7 +132,7 @@
       B.Store.update(d => { d.stats.certName = name; d.stats.certificates = (d.stats.certificates || 0) + 1; });
       const a = document.createElement("a");
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      a.download = "bitwood-certificate-" + (slug || "player") + ".png";
+      a.download = "bitwood-" + TRACK.id + "-certificate-" + (slug || "player") + ".png";
       a.href = canvas.toDataURL("image/png");
       document.body.appendChild(a); a.click(); a.remove();
       if (B.Sound) B.Sound.play("win");

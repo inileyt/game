@@ -10,7 +10,7 @@
     return '<li class="lb-row' + (me ? " is-me" : "") + (rank <= 3 ? " top" : "") + '" style="--d:' + Math.min(i, 12) * 50 + 'ms">' +
       '<span class="lb-rank">' + (medal ? '<img class="pixelated" alt="" src="' + B.spriteURL(medal, 3) + '"><span class="sr-only">' + rank + "</span>" : "#" + rank) + "</span>" +
       '<span class="lb-name">' + B.escapeHTML(p.username) + (me ? ' <span class="tag">You</span>' : "") + "</span>" +
-      '<span class="lb-num lb-levels"><b>' + p.levels + "</b><small>/10</small></span>" +
+      '<span class="lb-num lb-levels"><b>' + p.levels + "</b><small>/20</small></span>" +
       '<span class="lb-num"><b>' + p.stars + '</b><img class="pixelated" alt="stars" src="' + B.spriteURL("star", 2) + '"></span>' +
       '<span class="lb-xp"><b>' + p.xp + "</b> XP</span></li>";
   }

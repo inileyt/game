@@ -9,8 +9,8 @@
     return s + "</span>";
   }
 
-  function renderLevelCards(container) {
-    const levels = window.BITWOOD_LEVELS;
+  function renderLevelCards(container, trackId) {
+    const levels = trackId ? B.Tracks.levels(trackId) : window.BITWOOD_LEVELS;
     const data = B.Store.get();
     container.innerHTML = "";
     levels.forEach((lv, i) => {
@@ -22,12 +22,12 @@
       a.setAttribute("data-reveal", "");
       a.style.setProperty("--d", i * 80 + "ms");
       if (unlocked) a.href = "level.html?id=" + lv.id;
-      else a.setAttribute("aria-label", "Level " + lv.id + " " + lv.name + " (locked)");
+      else a.setAttribute("aria-label", B.Tracks.of(lv).name + " level " + B.Tracks.num(lv) + " " + lv.name + " (locked)");
       a.innerHTML =
         '<canvas class="thumb" aria-hidden="true"></canvas>' +
         (unlocked ? "" : '<img class="lock-ico pixelated" alt="" src="' + B.spriteURL("lock", 3) + '">') +
         '<div class="body">' +
-        '<span class="lv">Level ' + lv.id + " · " + B.escapeHTML(lv.topic) + "</span>" +
+        '<span class="lv">Level ' + B.Tracks.num(lv) + " · " + B.escapeHTML(lv.topic) + "</span>" +
         "<h3>" + B.escapeHTML(lv.name) + "</h3>" +
         "<p>" + B.escapeHTML(lv.blurb) + "</p>" +
         '<div class="tags">' +

@@ -20,8 +20,8 @@
     const done = Object.values(d.done || {});
     return {
       xp: Math.min(1000000, B.Store.xp()),
-      stars: Math.min(30, done.reduce((s, x) => s + (x.stars || 0), 0)),
-      levels: Math.min(10, done.length),
+      stars: Math.min(60, done.reduce((s, x) => s + (x.stars || 0), 0)),
+      levels: Math.min(20, done.length),
       badges: Math.min(50, Object.keys(d.badges || {}).length)
     };
   }
@@ -331,7 +331,7 @@
     $(".acct-name", modal).textContent = profile ? profile.username : "Player";
     $(".acct-email", modal).textContent = user.email || "";
     $(".acct-xp", modal).textContent = sum.xp;
-    $(".acct-levels", modal).textContent = sum.levels + " / 10";
+    $(".acct-levels", modal).textContent = sum.levels + " / " + (window.BITWOOD_LEVELS ? window.BITWOOD_LEVELS.length : 20);
     $(".acct-stars", modal).textContent = sum.stars;
     const text = { syncing: "☁ Syncing…", saving: "☁ Saving…", saved: "☁ Progress saved to the cloud", error: "⚠ Couldn't reach the cloud — your progress is safe in this browser and will sync later." };
     $(".acct-status", modal).textContent = text[status] || "☁ Cloud save is on";

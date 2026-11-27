@@ -4,15 +4,45 @@
   "use strict";
   const B = window.Bitwood;
 
-  /* ---------------- Syntax highlighting ---------------- */
-  const TOKEN = /(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\.|[^`\\])*`?)|\b(\d+(?:\.\d+)?)\b|\b(const|let|var|function|return|if|else|for|while|do|of|in|new|typeof|break|continue|switch|case|default|class|this)\b|\b(true|false|null|undefined|NaN)\b|([A-Za-z_$][\w$]*)(?=\s*\()/g;
-  function highlight(src) {
+  /* ---------------- Syntax highlighting (JavaScript, Go, PHP) ---------------- */
+  const LANGS = {
+    js: {
+      comment: String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`,
+      string: String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|` + "`(?:\\\\.|[^`\\\\])*`?",
+      keyword: "const|let|var|function|return|if|else|for|while|do|of|in|new|typeof|break|continue|switch|case|default|class|this",
+      builtin: "true|false|null|undefined|NaN",
+      special: "(?!)"
+    },
+    go: {
+      comment: String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`,
+      string: String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|` + "`[^`]*`?",
+      keyword: "package|import|func|return|if|else|for|range|var|const|type|struct|map|chan|go|defer|switch|case|default|break|continue|int|float64|string|bool",
+      builtin: "true|false|nil|len|append|make",
+      special: "(?!)"
+    },
+    php: {
+      comment: String.raw`\/\/[^\n]*|#[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`,
+      string: String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`,
+      keyword: "echo|function|return|if|elseif|else|for|foreach|as|while|do|switch|case|default|break|continue|new|class|print",
+      builtin: "true|false|null|count",
+      special: String.raw`\$[A-Za-z_]\w*|<\?php|\?>`
+    }
+  };
+  const TOKENS = {};
+  function tokenRe(lang) {
+    if (TOKENS[lang]) return TOKENS[lang];
+    const l = LANGS[lang] || LANGS.js;
+    TOKENS[lang] = new RegExp("(" + l.comment + ")|(" + l.string + ")|\\b(\\d+(?:\\.\\d+)?)\\b|\\b(" + l.keyword + ")\\b|\\b(" + l.builtin + ")\\b|(" + l.special + ")|([A-Za-z_$][\\w$]*)(?=\\s*\\()", "g");
+    return TOKENS[lang];
+  }
+  function highlight(src, lang) {
+    const TOKEN = tokenRe(lang || "js");
     let out = "", last = 0, m;
     TOKEN.lastIndex = 0;
     while ((m = TOKEN.exec(src))) {
       if (m[0] === "") { TOKEN.lastIndex++; continue; }
       out += B.escapeHTML(src.slice(last, m.index));
-      const cls = m[1] ? "tok-c" : m[2] ? "tok-s" : m[3] ? "tok-n" : m[4] ? "tok-k" : m[5] ? "tok-b" : "tok-f";
+      const cls = m[1] ? "tok-c" : m[2] ? "tok-s" : m[3] ? "tok-n" : m[4] ? "tok-k" : m[5] ? "tok-b" : m[6] ? "tok-v" : "tok-f";
       out += '<span class="' + cls + '">' + B.escapeHTML(m[0]) + "</span>";
       last = m.index + m[0].length;
     }

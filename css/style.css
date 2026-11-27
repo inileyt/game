@@ -826,3 +826,64 @@ textarea { resize: vertical; min-height: 120px; }
   .nav-links .btn-ghost { padding: 8px 9px; font-size: 15px; }
   .nav-right { gap: 8px; }
 }
+
+/* ---------- Language tracks ---------- */
+.tok-v { color: #fca5a5; }
+.track-tabs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.track-tab {
+  --c: var(--color-accent-2);
+  display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; min-width: 170px;
+  background: rgba(15, 23, 42, .8); border: 2px solid var(--color-border); color: #e2e8f0;
+  transition: border-color .15s, transform .1s steps(2), background-color .15s;
+}
+.track-tab img { width: 30px; height: auto; }
+.track-tab span { display: flex; flex-direction: column; text-align: left; }
+.track-tab b { font: 700 17px/1.2 var(--font-pixel); color: #fff; }
+.track-tab small { font: 400 11px/1.4 var(--font-pixel-s); letter-spacing: .1em; text-transform: uppercase; color: var(--color-subtle); }
+.track-tab:hover { border-color: var(--c); transform: translateY(-2px); }
+.track-tab.is-active { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, #0f172a); box-shadow: 4px 4px 0 color-mix(in srgb, var(--c) 35%, transparent); }
+.track-tab.is-active b { color: var(--c); }
+.track-block { margin-top: 36px; }
+.track-block:first-of-type { margin-top: 0; }
+.track-head { --c: var(--color-accent-2); display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px dashed color-mix(in srgb, var(--c) 45%, transparent); }
+.track-head img { width: 40px; height: auto; }
+.track-head > div { flex: 1; }
+.track-head h3 { font-size: 22px; color: var(--c); display: flex; align-items: center; gap: 10px; }
+.track-head p { font-size: 15px; color: var(--color-subtle); }
+.tag.new { border-color: var(--pink); color: var(--pink); animation: bump 1.2s steps(2) infinite; }
+@media (max-width: 640px) { .track-tab { min-width: 0; flex: 1 1 100px; } .track-head .btn { display: none; } }
+
+/* ---------- Fill-in-the-blank + build-the-program puzzles ---------- */
+.puzzle-area { display: flex; flex-direction: column; gap: 14px; }
+.fill-code { margin: 0; padding: 16px; background: #020617; border: 2px solid var(--color-border); font: 400 15px/2 var(--font-code); color: #e2e8f0; letter-spacing: 0; overflow-x: auto; tab-size: 4; -moz-tab-size: 4; white-space: pre; }
+.fill-code code { background: none !important; padding: 0 !important; color: inherit !important; font: inherit !important; }
+input.blank {
+  display: inline-block; width: auto; height: 30px; margin: 0 2px; padding: 0 6px; vertical-align: middle;
+  font: 500 15px/1 var(--font-code); letter-spacing: 0; color: var(--color-accent-2); text-align: center;
+  background: rgba(250, 204, 21, .08); border: 2px dashed rgba(250, 204, 21, .7);
+}
+input.blank:focus { border-style: solid; border-color: var(--color-accent-2); box-shadow: 0 0 0 3px rgba(250, 204, 21, .25); }
+input.blank.is-right { color: var(--green); border: 2px solid var(--green); background: rgba(163, 230, 53, .12); animation: bump .3s steps(3); }
+input.blank.is-wrong { color: var(--pink); border: 2px solid var(--pink); background: rgba(255, 114, 134, .1); animation: shake .3s steps(3); }
+.q-output { border: 2px solid var(--color-border); background: #020617; }
+.q-output span { display: block; padding: 6px 12px; font: 400 11px/1.4 var(--font-pixel-s); letter-spacing: .12em; text-transform: uppercase; color: var(--color-subtle); border-bottom: 2px solid var(--color-border); background: #0b1224; }
+.q-output pre { margin: 0; padding: 10px 14px; font: 400 14px/1.6 var(--font-code); color: var(--green); letter-spacing: 0; white-space: pre-wrap; }
+.puzzle-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pz-label { font: 400 12px/1.4 var(--font-pixel-s) !important; letter-spacing: .12em !important; text-transform: uppercase; color: var(--color-subtle) !important; }
+.order-built { list-style: none; counter-reset: line; margin: 0; padding: 10px; min-height: 64px; background: #020617; border: 2px solid var(--color-border); display: flex; flex-direction: column; gap: 6px; }
+.order-built.is-empty { border-style: dashed; justify-content: center; }
+.order-built.is-empty::before { content: "Click the pieces below to build your program here"; text-align: center; font-size: 14px; color: #64748b; letter-spacing: .03em; }
+.order-built li { counter-increment: line; display: flex; align-items: center; gap: 10px; }
+.order-built li::before { content: counter(line); width: 22px; flex: none; text-align: right; font: 400 13px/1 var(--font-code); color: #475569; }
+.order-built.is-solved { border-color: var(--green); }
+.order-pool { display: flex; flex-wrap: wrap; gap: 8px; min-height: 20px; }
+.order-piece {
+  display: inline-flex; align-items: center; text-align: left; padding: 8px 12px; min-height: 40px; max-width: 100%;
+  background: rgba(30, 41, 59, .8); border: 2px solid var(--color-border); color: #e2e8f0;
+  transition: border-color .15s, transform .1s steps(2), background-color .15s;
+}
+.order-piece code { font: 400 14px/1.4 var(--font-code) !important; background: none !important; padding: 0 !important; color: inherit !important; white-space: pre; overflow-x: auto; }
+.order-piece:hover { border-color: var(--sky); transform: translateY(-2px); }
+.order-built .order-piece { flex: 1; background: rgba(4, 45, 77, .5); animation: line-in .2s steps(3); }
+.order-built .order-piece.is-wrong { border-color: var(--pink); background: rgba(255, 114, 134, .12); animation: shake .3s steps(3); }
+.order-built.is-solved .order-piece { border-color: rgba(163, 230, 53, .6); cursor: default; transform: none; }

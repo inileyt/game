@@ -41,8 +41,9 @@
   <main id="main">
     <section class="page-head container">
       <span class="eyebrow"><span class="blink-star" aria-hidden="true"></span>World map<span class="blink-star" aria-hidden="true"></span></span>
-      <h1>The Isle of Bitwood</h1>
-      <p>Ten worlds, ten coding quests. Clear a level to open the path to the next one. Click a level to see what waits there.</p>
+      <h1 id="map-title">The Isle of Bitwood</h1>
+      <p id="map-lead">Choose a language, then clear a level to open the path to the next one.</p>
+      <nav class="track-tabs" id="track-tabs" aria-label="Choose a language"></nav>
       <div class="progress-row" aria-label="Your progress">
         <div class="xp-bar" role="presentation"><i id="xp-fill"></i></div>
         <span class="xp-text" id="xp-text">0 / 3300 XP</span>
@@ -52,7 +53,7 @@
     <section class="container" aria-label="Map">
       <div class="map-wrap" data-reveal>
         <div class="pixel-box map-frame" id="map-frame">
-          <canvas id="map" role="img" aria-label="Pixel island map with ten level locations connected by a path"></canvas>
+          <canvas id="map" role="img" aria-label="Pixel island map"></canvas>
           <div class="map-hero" id="map-hero" aria-hidden="true"><img data-sprite="heroA" data-scale="4" alt=""></div>
         </div>
       </div>
@@ -95,8 +96,8 @@
           <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="leaderboard.html">Leaderboard</a></li><li><a href="certificate.html">Certificate</a></li></ul>
         </div>
         <div>
-          <h4>Worlds</h4>
-          <ul><li><a href="level.html?id=1">Variable Village</a></li><li><a href="level.html?id=5">Object Castle</a></li><li><a href="level.html?id=10">Star Citadel</a></li></ul>
+          <h4>Languages</h4>
+          <ul><li><a href="levels.html?track=js">JavaScript</a></li><li><a href="levels.html?track=go">Go</a></li><li><a href="levels.html?track=php">PHP</a></li></ul>
         </div>
         <div>
           <h4>Contact</h4>
@@ -121,6 +122,7 @@
   <script src="js/config.js"></script>
   <script src="js/cloud.js"></script>
   <script src="js/levels-data.js"></script>
+  <script src="js/tracks.js"></script>
   <script src="js/cards.js"></script>
   <script src="js/map.js"></script>
 </body>
