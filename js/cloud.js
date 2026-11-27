@@ -62,6 +62,23 @@
       streak: recent.streak || 0,
       last: recent.last || ""
     };
+    // academy courses: union of finished lessons, best exam result
+    out.courses = {};
+    const lc = L.courses || {}, cc = C.courses || {};
+    new Set(Object.keys(lc).concat(Object.keys(cc))).forEach(id => {
+      const a = lc[id] || {}, b = cc[id] || {};
+      const lessons = Object.assign({}, b.lessons || {});
+      Object.entries(a.lessons || {}).forEach(([k, v]) => { lessons[k] = lessons[k] ? Math.min(lessons[k], v) : v; });
+      const ea = a.exam || null, eb = b.exam || null;
+      let exam = ea || eb;
+      if (ea && eb) exam = {
+        best: Math.max(ea.best || 0, eb.best || 0),
+        passed: !!(ea.passed || eb.passed),
+        attempts: Math.max(ea.attempts || 0, eb.attempts || 0),
+        at: Math.max(ea.at || 0, eb.at || 0)
+      };
+      out.courses[id] = exam ? { lessons, exam } : { lessons };
+    });
     return out;
   }
 
@@ -126,7 +143,8 @@
     }
   }
   function summaryOf(d) {
-    return { done: Object.keys(d.done || {}).sort(), badges: Object.keys(d.badges || {}).length, daily: (d.daily || {}).count || 0 };
+    const courses = Object.entries(d.courses || {}).map(([k, c]) => k + Object.keys(c.lessons || {}).length + (c.exam && c.exam.passed ? "p" : "")).sort();
+    return { done: Object.keys(d.done || {}).sort(), badges: Object.keys(d.badges || {}).length, daily: (d.daily || {}).count || 0, courses };
   }
 
   /* ---------------- auth helpers ---------------- */

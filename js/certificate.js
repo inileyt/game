@@ -1,21 +1,56 @@
-/* Certificate: after all 10 levels, type your name and download a pixel-art certificate (PNG). */
+/* Certificate: one per language track (all levels cleared) and one per Academy course (final exam passed).
+   Type your name and download a pixel-art certificate (PNG). */
 (function () {
   "use strict";
   const B = window.Bitwood;
   const params = new URLSearchParams(location.search);
-  const TRACK = B.Tracks.byId(params.get("track") || "js");
-  const LEVELS = B.Tracks.levels(TRACK.id);
   const $ = id => document.getElementById(id);
   const W = 1600, H = 1130;
+  const fmtDate = t => new Date(t).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 
-  function stats() {
-    const d = B.Store.get();
-    const done = LEVELS.filter(l => d.done[l.id]);
+  /* Everything a certificate can be for: language tracks and Academy courses */
+  function trackSubject(T) {
+    const levels = B.Tracks.levels(T.id), d = B.Store.get();
+    const done = levels.filter(l => d.done[l.id]);
     const stars = done.reduce((s, l) => s + (d.done[l.id].stars || 0), 0);
     const finished = done.length ? Math.max(...done.map(l => d.done[l.id].at || 0)) : Date.now();
-    const xp = done.reduce((s, l) => s + l.xp, 0);
-    return { done: done.length, stars, xp, finished };
+    const next = levels.find(l => !d.done[l.id]);
+    return {
+      key: "track=" + T.id, id: T.id, name: T.name, color: T.color, icon: T.icon,
+      done: done.length, total: levels.length, unlocked: done.length === levels.length, unit: "levels",
+      kicker: T.name.toUpperCase() + " · OF COMPLETION",
+      line1: "has conquered all " + levels.length + " " + T.name + " worlds of Bitwood — the pixel coding adventure —",
+      line2: "and learned " + T.topics + ".",
+      stats: "★ " + stars + " / " + levels.length * 3 + " stars     ·     " + done.reduce((s, l) => s + l.xp, 0) + " XP     ·     " + fmtDate(finished),
+      lockedText: "Clear every " + T.name + " level to unlock this certificate.",
+      next: next ? { href: "level.html?id=" + next.id, label: "Play " + next.name } : null
+    };
   }
+  function courseSubject(c) {
+    const p = B.Store.get().courses[c.id] || {}, e = p.exam || {};
+    const lessons = Object.keys(p.lessons || {}).length;
+    const nextLesson = c.lessons.findIndex((_, i) => !(p.lessons || {})[i + 1]) + 1;
+    return {
+      key: "course=" + c.id, id: c.id, name: c.name, color: c.color, icon: c.icon,
+      done: lessons, total: c.lessons.length, unlocked: !!e.passed, unit: "lessons",
+      kicker: c.title.toUpperCase(),
+      line1: "has completed the " + c.title + " course of Bitwood Academy —",
+      line2: c.lessons.length + " lessons and a final exam on " + c.topics + ".",
+      stats: "Exam score: " + (e.best || 0) + " / " + c.exam.length + "     ·     " + (lessons * 20 + 150) + " XP     ·     " + fmtDate(e.at || Date.now()),
+      lockedText: lessons < c.lessons.length ? "Finish all " + c.lessons.length + " lessons, then pass the final exam." : "Pass the final exam (14 / 20) to unlock this certificate.",
+      next: lessons < c.lessons.length ? { href: "lesson.html?c=" + c.id + "&l=" + nextLesson, label: "Go to lesson " + nextLesson } : { href: "exam.html?c=" + c.id, label: "Take the exam" }
+    };
+  }
+  function allSubjects() {
+    return B.Tracks.list.map(trackSubject).concat((window.BITWOOD_COURSES || []).map(courseSubject));
+  }
+  function currentSubject() {
+    const course = params.get("course");
+    const list = allSubjects();
+    if (course) return list.find(s => s.key === "course=" + course) || list[0];
+    return list.find(s => s.key === "track=" + (params.get("track") || "js")) || list[0];
+  }
+  const SUBJECT = currentSubject();
 
   function drawSprite(g, name, x, y, scale) {
     const s = B.sprite(name);
@@ -41,8 +76,6 @@
     const g = canvas.getContext("2d");
     canvas.width = W; canvas.height = H;
     g.imageSmoothingEnabled = false;
-    const st = stats();
-
     // background + pixel-scene strip at the bottom
     const bg = g.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, "#0a0f3d"); bg.addColorStop(1, "#020617");
@@ -72,14 +105,14 @@
     // text
     drawSprite(g, "crown", W / 2 - 60, 92, 12);
     centerText(g, "CERTIFICATE", 290, "700 92px Silkscreen, monospace", "#facc15", "#042d4d");
-    centerText(g, TRACK.name.toUpperCase() + " · OF COMPLETION", 350, "700 36px Silkscreen, monospace", "#f8fafc");
+    centerText(g, SUBJECT.kicker, 350, "700 36px Silkscreen, monospace", "#f8fafc");
     centerText(g, "This certifies that", 450, "500 32px Mulish, sans-serif", "#cbd5e1");
     const font = fitFont(g, name, "700", "Silkscreen, monospace", 88, W - 300);
     centerText(g, name, 560, font, "#ffffff", "#042d4d");
     g.fillStyle = "#facc15"; g.fillRect(W / 2 - 420, 590, 840, 6);
-    centerText(g, "has conquered all " + LEVELS.length + " " + TRACK.name + " worlds of Bitwood — the pixel coding adventure —", 660, "500 30px Mulish, sans-serif", "#e2e8f0");
-    centerText(g, "and learned " + TRACK.topics + ".", 705, "500 30px Mulish, sans-serif", "#e2e8f0");
-    centerText(g, "★ " + st.stars + " / " + LEVELS.length * 3 + " stars     ·     " + st.xp + " XP     ·     " + new Date(st.finished).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }), 785, "700 30px Silkscreen, monospace", "#a3e635");
+    centerText(g, SUBJECT.line1, 660, fitFont(g, SUBJECT.line1, "500", "Mulish, sans-serif", 30, W - 260), "#e2e8f0");
+    centerText(g, SUBJECT.line2, 705, fitFont(g, SUBJECT.line2, "500", "Mulish, sans-serif", 30, W - 260), "#e2e8f0");
+    centerText(g, SUBJECT.stats, 785, fitFont(g, SUBJECT.stats, "700", "Silkscreen, monospace", 30, W - 260), "#a3e635");
 
     // signature
     g.textAlign = "left";
@@ -93,27 +126,25 @@
   function renderTabs() {
     const wrap = $("cert-tabs");
     if (!wrap) return;
-    wrap.innerHTML = B.Tracks.list.map(t => {
-      const ls = B.Tracks.levels(t.id), done = ls.filter(l => B.Store.isDone(l.id)).length;
-      return '<a class="track-tab' + (t.id === TRACK.id ? " is-active" : "") + '" href="certificate.html?track=' + t.id + '"' + (t.id === TRACK.id ? ' aria-current="page"' : "") +
-        ' style="--c:' + t.color + '"><img class="pixelated" alt="" src="' + B.spriteURL(t.icon, 3) + '"><span><b>' + B.escapeHTML(t.name) + "</b><small>" + (done === ls.length ? "Unlocked ✓" : done + " / " + ls.length + " levels") + "</small></span></a>";
+    wrap.innerHTML = allSubjects().map(t => {
+      const on = t.key === SUBJECT.key;
+      return '<a class="track-tab' + (on ? " is-active" : "") + '" href="certificate.html?' + t.key + '"' + (on ? ' aria-current="page"' : "") +
+        ' style="--c:' + t.color + '"><img class="pixelated" alt="" src="' + B.spriteURL(t.icon, 3) + '"><span><b>' + B.escapeHTML(t.name) + "</b><small>" + (t.unlocked ? "Unlocked ✓" : t.done + " / " + t.total + " " + t.unit) + "</small></span></a>";
     }).join("");
   }
 
   async function init() {
     renderTabs();
-    document.title = TRACK.name + " Certificate — Bitwood";
-    const st = stats();
-    const locked = st.done < LEVELS.length;
+    document.title = SUBJECT.name + " Certificate — Bitwood";
+    const locked = !SUBJECT.unlocked;
     $("cert-locked").hidden = !locked;
     $("cert-open").hidden = locked;
     if (locked) {
-      $("cert-progress").textContent = st.done + " / " + LEVELS.length;
-      $("cert-fill").style.setProperty("--p", (st.done / LEVELS.length).toFixed(3));
-      const next = LEVELS.find(l => !B.Store.isDone(l.id));
+      $("cert-what").textContent = SUBJECT.lockedText;
+      $("cert-progress").textContent = SUBJECT.done + " / " + SUBJECT.total + " " + SUBJECT.unit;
+      $("cert-fill").style.setProperty("--p", (SUBJECT.done / SUBJECT.total).toFixed(3));
       const btn = $("cert-continue");
-      btn.href = "level.html?id=" + next.id;
-      btn.querySelector(".t-label").textContent = "Play level " + next.id;
+      if (SUBJECT.next) { btn.href = SUBJECT.next.href; btn.querySelector(".t-label").textContent = SUBJECT.next.label; }
       return;
     }
     try { await Promise.all([document.fonts.load("700 40px Silkscreen"), document.fonts.load("500 30px Mulish"), document.fonts.load("italic 600 40px Mulish")]); } catch (e) { /* fall back to system fonts */ }
@@ -132,7 +163,7 @@
       B.Store.update(d => { d.stats.certName = name; d.stats.certificates = (d.stats.certificates || 0) + 1; });
       const a = document.createElement("a");
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      a.download = "bitwood-" + TRACK.id + "-certificate-" + (slug || "player") + ".png";
+      a.download = "bitwood-" + SUBJECT.id + "-certificate-" + (slug || "player") + ".png";
       a.href = canvas.toDataURL("image/png");
       document.body.appendChild(a); a.click(); a.remove();
       if (B.Sound) B.Sound.play("win");

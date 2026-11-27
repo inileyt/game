@@ -28,6 +28,17 @@
       special: String.raw`\$[A-Za-z_]\w*|<\?php|\?>`
     }
   };
+  const HASH_COMMENT = String.raw`#[^\n]*`;
+  const DQ = String.raw`"(?:\\.|[^"\\\n])*"?`, SQ = String.raw`'(?:\\.|[^'\\\n])*'?`;
+  Object.assign(LANGS, {
+    html: { comment: String.raw`<!--[\s\S]*?(?:-->|$)`, string: DQ + "|" + SQ, keyword: "DOCTYPE", builtin: "(?!)", special: String.raw`<\/?[A-Za-z][\w-]*|\/?>|!DOCTYPE` },
+    css: { comment: String.raw`\/\*[\s\S]*?(?:\*\/|$)`, string: DQ + "|" + SQ, keyword: "(?!)", builtin: "auto|none|flex|grid|block|center|solid|repeat", special: String.raw`[\w-]+(?=\s*:[^:])|@media|#[\w-]+|\.[A-Za-z][\w-]*` },
+    bash: { comment: HASH_COMMENT, string: DQ + "|" + SQ, keyword: "git|npm|docker|kubectl|sudo|cd|ls|mkdir|cat|tail|grep|chmod|systemctl|pwd|wc|echo", builtin: "(?!)", special: String.raw`(?:^|\s)-{1,2}[\w-]+` },
+    yaml: { comment: HASH_COMMENT, string: DQ + "|" + SQ, keyword: "(?!)", builtin: "true|false|null", special: String.raw`[\w./-]+(?=:(?:\s|$))` },
+    sql: { comment: String.raw`--[^\n]*`, string: SQ, keyword: "SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|JOIN|ON|ORDER|BY|DESC|ASC|LIMIT|CREATE|TABLE|INDEX|AND|OR|NOT|NULL|PRIMARY|KEY|REFERENCES", builtin: "(?!)", special: "(?!)" },
+    json: { comment: "(?!)", string: DQ, keyword: "(?!)", builtin: "true|false|null", special: "(?!)" },
+    docker: { comment: HASH_COMMENT, string: DQ, keyword: "FROM|WORKDIR|COPY|RUN|EXPOSE|CMD|ENV|ARG|ENTRYPOINT", builtin: "(?!)", special: "(?!)" }
+  });
   const TOKENS = {};
   function tokenRe(lang) {
     if (TOKENS[lang]) return TOKENS[lang];
@@ -36,6 +47,7 @@
     return TOKENS[lang];
   }
   function highlight(src, lang) {
+    if (lang === "text") return B.escapeHTML(src);
     const TOKEN = tokenRe(lang || "js");
     let out = "", last = 0, m;
     TOKEN.lastIndex = 0;

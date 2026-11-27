@@ -11,12 +11,16 @@ A small website for learning to code, styled like a 2D pixel game.
   tasks checked by hidden tests that run your code in a sandboxed Web Worker. Go and PHP can't run in a browser, so
   their levels use quizzes, **fill-in-the-blank** code and **build-the-program** line puzzles, all checked instantly. A pixel hero walks along the
   quest track after every answer; after question 5 he walks into a **portal** that takes you to the next level.
+- **Bitwood Academy** (`courses.html`) — free **Frontend**, **Backend** and **DevOps** courses. Each has
+  10 lessons (explanations, code examples, key points and 2 check-questions, +20 XP each) and a
+  **20-question final exam** that unlocks after all lessons (pass with 14/20 → +150 XP, a badge and a
+  course certificate). Answer options are shuffled every time.
 - **Daily challenge** (`daily.html`) — a new coding puzzle every day, +50 XP and a day-streak counter.
 - **Playground** (`playground.html`) — write any JavaScript, see the console, and paint 32×32 pixel art with
   `pixel(x, y, color)`; save it as a PNG.
-- **Badges** (`badges.html`) — 14 badges to collect.
-- **Certificate** (`certificate.html?track=…`) — one per language: clear every level of a language, type your name
-  and download a pixel certificate.
+- **Badges** (`badges.html`) — 18 badges to collect.
+- **Certificate** (`certificate.html?track=…` / `?course=…`) — one per language (clear every level) and one per
+  Academy course (pass the exam): type your name and download a pixel certificate.
 - **Sound** — 8-bit sound effects and an original chiptune made live with the Web Audio API (toggle buttons
   in the menu; music is off until you turn it on).
 - **Accounts & cloud save** — sign up / sign in (Supabase). XP, stars, badges, daily streak and code sync
