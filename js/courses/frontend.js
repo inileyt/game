@@ -14,7 +14,7 @@
       minutes: 6,
       summary: "What really happens when you type an address and press Enter.",
       sections: [
-        { h: "Clients and servers", p: ["When you open a website, your <b>browser</b> (the client) sends a <b>request</b> over the internet to a <b>server</b>. The server answers with a <b>response</b> — usually files like HTML, CSS, JavaScript and images.", "The address you type is a <b>URL</b>. It tells the browser which server to ask and which page you want."],
+        { h: "Clients and servers", diagram: "request", p: ["When you open a website, your <b>browser</b> (the client) sends a <b>request</b> over the internet to a <b>server</b>. The server answers with a <b>response</b> — usually files like HTML, CSS, JavaScript and images.", "The address you type is a <b>URL</b>. It tells the browser which server to ask and which page you want."],
           code: "https://inileyt.github.io/game/levels.html\n└─┬──┘   └───────┬────────┘└─┬─┘└────┬────┘\nprotocol      domain        path   file", lang: "text" },
         { h: "The three languages of the frontend", p: ["<b>HTML</b> describes the content and structure (headings, text, buttons). <b>CSS</b> describes how it looks (colors, sizes, layout). <b>JavaScript</b> makes it interactive (clicks, animations, loading data).", "The <b>frontend</b> is everything that runs in the browser. The <b>backend</b> is what runs on the server."] },
         { h: "Rendering", p: ["The browser reads the HTML, builds a tree of elements (the <b>DOM</b>), applies the CSS, runs the JavaScript and finally paints pixels on the screen. Frontend developers make this fast, beautiful and easy to use."] }
@@ -115,7 +115,7 @@
       minutes: 8,
       summary: "Find elements, change them and react to clicks.",
       sections: [
-        { h: "The DOM", p: ["The <b>DOM</b> (Document Object Model) is the browser's live tree of your HTML. JavaScript can read and change it, and the page updates instantly."],
+        { h: "The DOM", diagram: "dom", p: ["The <b>DOM</b> (Document Object Model) is the browser's live tree of your HTML. JavaScript can read and change it, and the page updates instantly."],
           code: "const title = document.querySelector(\"h1\");\ntitle.textContent = \"Level up!\";\ntitle.classList.add(\"glow\");", lang: "js" },
         { h: "Events", p: ["An <b>event</b> is something that happens: a click, a key press, a form submit. Listen for it with <code>addEventListener</code>."],
           code: "const btn = document.querySelector(\"#start\");\nlet coins = 0;\n\nbtn.addEventListener(\"click\", () => {\n  coins++;\n  btn.textContent = `Coins: ${coins}`;\n});", lang: "js" },

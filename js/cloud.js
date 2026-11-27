@@ -78,6 +78,14 @@
         at: Math.max(ea.at || 0, eb.at || 0)
       };
       out.courses[id] = exam ? { lessons, exam } : { lessons };
+      // timed challenge: keep the better run (higher score, then faster)
+      const ta = a.timed, tb = b.timed;
+      let timed = ta || tb;
+      if (ta && tb && ta.best !== undefined && tb.best !== undefined) {
+        const aBetter = ta.best > tb.best || (ta.best === tb.best && ta.bestTime <= tb.bestTime);
+        timed = Object.assign({}, aBetter ? ta : tb, { attempts: Math.max(ta.attempts || 0, tb.attempts || 0) });
+      }
+      if (timed) out.courses[id].timed = timed;
     });
     return out;
   }
@@ -380,6 +388,27 @@
     const { count, error } = await client.from("profiles").select("id", { count: "exact", head: true }).gt("xp", profile.xp || 0);
     return error ? null : (count || 0) + 1;
   }
+  /* Timed-exam speed leaderboard (table exam_records) */
+  async function timedBoard(course, limit) {
+    if (!enabled) throw new Error("offline");
+    const { data, error } = await client.from("exam_records")
+      .select("user_id, score, seconds, profiles(username)")
+      .eq("course", course)
+      .order("score", { ascending: false }).order("seconds", { ascending: true }).order("updated_at", { ascending: true })
+      .limit(limit || 10);
+    if (error) throw error;
+    return data.map(r => ({ user_id: r.user_id, score: r.score, seconds: r.seconds, username: (r.profiles && r.profiles.username) || "Player" }));
+  }
+  async function submitTimed(course, score, seconds) {
+    if (!user) throw new Error("not signed in");
+    const cur = await client.from("exam_records").select("score, seconds").eq("user_id", user.id).eq("course", course).maybeSingle();
+    if (cur.error) throw cur.error;
+    if (cur.data && (cur.data.score > score || (cur.data.score === score && cur.data.seconds <= seconds))) return "kept";
+    const { error } = await client.from("exam_records").upsert({ user_id: user.id, course, score, seconds, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    return "saved";
+  }
+
   async function sendMessage(msg) {
     if (!enabled) throw new Error("offline");
     const row = { name: msg.name, email: msg.email, topic: msg.topic, message: msg.message };
@@ -393,7 +422,7 @@
     get user() { return user; },
     get profile() { return profile; },
     onChange(fn) { listeners.push(fn); },
-    openAccount, leaderboard, myRank, sendMessage,
+    openAccount, leaderboard, myRank, sendMessage, timedBoard, submitTimed,
     saveNow() { clearTimeout(pushTimer); return push(); }
   };
 

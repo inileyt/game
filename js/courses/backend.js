@@ -15,7 +15,7 @@
       summary: "The part of an app you don't see — but that keeps everything running.",
       sections: [
         { h: "Frontend vs backend", p: ["The <b>frontend</b> runs in the user's browser. The <b>backend</b> runs on servers you control. It stores data, checks passwords, talks to other services and decides what each user is allowed to see.", "When you clear a level in Bitwood and your XP shows up on the leaderboard, that's the backend at work."] },
-        { h: "The request–response cycle", p: ["1. The frontend sends a <b>request</b> (\"give me the top players\"). 2. The backend runs code, maybe asks a <b>database</b>. 3. It sends back a <b>response</b> (usually JSON)."],
+        { h: "The request–response cycle", diagram: "request", p: ["1. The frontend sends a <b>request</b> (\"give me the top players\"). 2. The backend runs code, maybe asks a <b>database</b>. 3. It sends back a <b>response</b> (usually JSON)."],
           code: "Browser ──request──▶ Server ──query──▶ Database\nBrowser ◀─response── Server ◀─rows──── Database", lang: "text" },
         { h: "Backend languages", p: ["Backends are written in many languages: <b>JavaScript (Node.js)</b>, <b>Python</b>, <b>Go</b>, <b>PHP</b>, <b>Java</b>, <b>C#</b>, <b>Ruby</b>… The ideas in this course work in all of them."] }
       ],

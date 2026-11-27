@@ -11,14 +11,16 @@ A small website for learning to code, styled like a 2D pixel game.
   tasks checked by hidden tests that run your code in a sandboxed Web Worker. Go and PHP can't run in a browser, so
   their levels use quizzes, **fill-in-the-blank** code and **build-the-program** line puzzles, all checked instantly. A pixel hero walks along the
   quest track after every answer; after question 5 he walks into a **portal** that takes you to the next level.
-- **Bitwood Academy** (`courses.html`) — free **Frontend**, **Backend** and **DevOps** courses. Each has
-  10 lessons (explanations, code examples, key points and 2 check-questions, +20 XP each) and a
-  **20-question final exam** that unlocks after all lessons (pass with 14/20 → +150 XP, a badge and a
-  course certificate). Answer options are shuffled every time.
+- **Bitwood Academy** (`courses.html`) — 8 free courses: **Frontend**, **Backend**, **DevOps**, **Git & GitHub**,
+  **Python**, **React**, **Cybersecurity** and **AI basics**. Each has 10 lessons (explanations, code examples,
+  **animated pixel diagrams**, key points and 2 check-questions, +20 XP each) and a **20-question final exam** that
+  unlocks after all lessons (pass with 14/20 → +150 XP, a badge and a course certificate). Options are shuffled
+  every time. A **⏱ timed challenge** (20 questions in 10 minutes) puts fast passes on a per-course speed leaderboard.
+- **Glossary** (`glossary.html`) — ~95 tech terms; words in lessons are clickable and show their definition.
 - **Daily challenge** (`daily.html`) — a new coding puzzle every day, +50 XP and a day-streak counter.
 - **Playground** (`playground.html`) — write any JavaScript, see the console, and paint 32×32 pixel art with
   `pixel(x, y, color)`; save it as a PNG.
-- **Badges** (`badges.html`) — 18 badges to collect.
+- **Badges** (`badges.html`) — 25 badges to collect.
 - **Certificate** (`certificate.html?track=…` / `?course=…`) — one per language (clear every level) and one per
   Academy course (pass the exam): type your name and download a pixel certificate.
 - **Sound** — 8-bit sound effects and an original chiptune made live with the Web Audio API (toggle buttons
@@ -72,7 +74,9 @@ One-time setup in the Supabase dashboard:
    This creates `profiles` (public leaderboard), `progress` (private cloud save) and `messages`
    (contact form), with their security rules.
    If you already ran it before the Go and PHP levels were added, also run
-   [`supabase/migrations/002_go_php_levels.sql`](supabase/migrations/002_go_php_levels.sql) once.
+   [`supabase/migrations/002_go_php_levels.sql`](supabase/migrations/002_go_php_levels.sql) and
+   [`supabase/migrations/003_exam_records.sql`](supabase/migrations/003_exam_records.sql) once each
+   (003 adds the timed-exam speed leaderboard).
 2. **Authentication → URL Configuration**
    - Site URL: `https://inileyt.github.io/game/`
    - Redirect URLs: add `https://inileyt.github.io/game/**`

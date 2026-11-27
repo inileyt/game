@@ -56,7 +56,32 @@
     cta.hidden = !!signedIn;
   }
 
+  /* Speed exams: fastest passes of the timed Academy exams, per course */
+  const mmss = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  async function loadSpeed() {
+    const sel = $("speed-course"), list = $("speed-list");
+    if (!sel || !list) return;
+    if (!B.Cloud || !B.Cloud.enabled) { list.innerHTML = '<li class="muted">The speed leaderboard can\'t be reached right now.</li>'; return; }
+    list.innerHTML = '<li class="muted">Loading…</li>';
+    try {
+      const rows = await B.Cloud.timedBoard(sel.value, 10);
+      const me = B.Cloud.user ? B.Cloud.user.id : null;
+      list.innerHTML = rows.length ? rows.map((r, i) => '<li class="' + (r.user_id === me ? "is-me" : "") + '"><span class="ex-rank">#' + (i + 1) + '</span><span class="ex-name">' + B.escapeHTML(r.username) + '</span><span class="ex-sc">' + r.score + '/20</span><span class="ex-time">' + mmss(r.seconds) + "</span></li>").join("")
+        : '<li class="muted">No timed runs yet for this course — <a href="exam.html?c=' + sel.value + '">be the first!</a></li>';
+    } catch (e) {
+      list.innerHTML = '<li class="muted">' + (/exam_records|PGRST/.test(e.message || "") ? "The speed leaderboard is being set up — check back soon!" : "Couldn't load the speed leaderboard.") + "</li>";
+    }
+  }
+  function initSpeed() {
+    const sel = $("speed-course");
+    if (!sel) return;
+    sel.innerHTML = (window.BITWOOD_COURSES || []).map(c => '<option value="' + c.id + '">' + B.escapeHTML(c.title) + "</option>").join("");
+    sel.addEventListener("change", loadSpeed);
+    loadSpeed();
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    initSpeed();
     $("lb-join").addEventListener("click", () => B.Cloud && B.Cloud.openAccount("signup"));
     $("lb-signin").addEventListener("click", () => B.Cloud && B.Cloud.openAccount("signin"));
     renderCta();
