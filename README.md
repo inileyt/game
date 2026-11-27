@@ -6,8 +6,17 @@ A small website for learning to code, styled like a 2D pixel game.
 - **Home** (`index.html`) — animated 2D pixel adventure background (parallax sky, mountains, castle,
   forest, coins, slimes and a running hero — press <kbd>Space</kbd> or tap to jump) with a **START** button.
 - **World map** (`levels.html`) — an animated pixel island with the **10 levels**; levels unlock one after another.
-- **Level** (`level.html?id=1…10`) — a short lesson, a code editor with syntax highlighting and hidden tests
-  that run your JavaScript in a sandboxed Web Worker. Clear a level to earn XP and up to 3 stars.
+- **Level** (`level.html?id=1…10`) — a short lesson and **5 questions**: three quick quizzes and two coding tasks
+  checked by hidden tests that run your JavaScript in a sandboxed Web Worker. A pixel hero walks along the
+  quest track after every answer; after question 5 he walks into a **portal** that takes you to the next level.
+- **Daily challenge** (`daily.html`) — a new coding puzzle every day, +50 XP and a day-streak counter.
+- **Playground** (`playground.html`) — write any JavaScript, see the console, and paint 32×32 pixel art with
+  `pixel(x, y, color)`; save it as a PNG.
+- **Badges** (`badges.html`) — 11 badges to collect.
+- **Certificate** (`certificate.html`) — after all 10 levels, type your name and download a pixel certificate.
+- **Sound** — 8-bit sound effects and an original chiptune made live with the Web Audio API (toggle buttons
+  in the menu; music is off until you turn it on).
+- **Contact form** — on the home page; it opens the visitor's email app with the message ready to send.
 
 | # | World | Topic |
 |---|-------|-------|

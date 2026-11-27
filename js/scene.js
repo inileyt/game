@@ -392,9 +392,16 @@
       }
     }
 
-    jump() {
-      if (this.hero.onGround) { this.hero.vy = -125; this.hero.onGround = false; }
+    jump(byUser) {
+      if (this.hero.onGround) {
+        this.hero.vy = -125; this.hero.onGround = false;
+        if (this.opts.onEvent) this.opts.onEvent("jump", !!byUser);
+        return true;
+      }
+      return false;
     }
+
+    emit(name) { if (this.opts.onEvent) this.opts.onEvent(name, false); }
 
     burst(x, y, colors, n) {
       for (let i = 0; i < n; i++) {
@@ -409,6 +416,11 @@
       this.t += dt;
       const speed = this.opts.speed;
       this.cam += speed * dt;
+      if (this.opts.walk) { // animate walking frames even without game entities
+        this.hero.ft += dt;
+        if (this.hero.ft > 0.14) { this.hero.ft = 0; this.hero.frame ^= 1; }
+      }
+      if (this.opts.onUpdate) this.opts.onUpdate(dt, this);
       if (!this.opts.entities) return;
       this.spawn();
       const h = this.hero, gy = this.gy;
@@ -432,7 +444,7 @@
           const sb = { x: sx + 1, y: gy - 8, w: 10, h: 8 };
           if (overlap(hb, sb)) {
             if (h.vy > 0) { // stomp!
-              e.alive = false; h.vy = -95; h.onGround = false;
+              e.alive = false; h.vy = -95; h.onGround = false; this.emit("stomp");
               this.burst(sx + 6, gy - 5, ["#4ade80", "#86efac", "#15803d"], 14);
               this.addCoins(3, sx + 6, gy - 14);
             }
@@ -442,11 +454,11 @@
           if (overlap(hb, { x: sx, y: cy, w: 8, h: 8 })) {
             e.alive = false;
             this.burst(sx + 4, cy + 4, ["#fde047", "#facc15", "#ffffff"], 6);
-            this.addCoins(1, sx + 4, cy - 2);
+            this.addCoins(1, sx + 4, cy - 2); this.emit("coin");
           }
         } else if (e.type === "chest") {
           if (!e.open && sx < hx + 10) {
-            e.open = true;
+            e.open = true; this.emit("chest");
             this.burst(sx + 5, gy - 10, ["#fde047", "#a78bfa", "#2cbaff", "#ffffff"], 16);
             this.addCoins(5, sx + 5, gy - 18);
           }
@@ -542,15 +554,23 @@
           ctx.drawImage(sprite(["coin0", "coin1", "coin2", "coin1"][f]), sx, e.y + Math.round(Math.sin(t * 4 + e.ph)));
         } else if (e.type === "chest") this.drawChest(sx, gy, e.open);
       }
-      // hero
-      if (this.opts.hero) {
+      if (this.opts.beforeHero) this.opts.beforeHero(ctx, this);
+      // hero (heroScale < 1 shrinks him into / grows him out of a portal)
+      const hs = this.heroScale === undefined ? 1 : this.heroScale;
+      if (this.opts.hero && hs > 0) {
         const h = this.hero, name = !h.onGround ? "heroJump" : (h.frame ? "heroB" : "heroA");
         const hy = gy - 16 + Math.round(h.y);
-        ctx.fillStyle = "rgba(2,6,23,.35)";
-        const shw = h.onGround ? 10 : Math.max(4, 10 + Math.round(h.y / 4));
-        ctx.fillRect(this.hx + 6 - shw / 2, gy, shw, 1);
-        ctx.drawImage(sprite(name), this.hx, hy);
+        if (hs >= 1) {
+          ctx.fillStyle = "rgba(2,6,23,.35)";
+          const shw = h.onGround ? 10 : Math.max(4, 10 + Math.round(h.y / 4));
+          ctx.fillRect(this.hx + 6 - shw / 2, gy, shw, 1);
+          ctx.drawImage(sprite(name), this.hx, hy);
+        } else {
+          const w = Math.max(1, Math.round(12 * hs)), hh = Math.max(1, Math.round(16 * hs));
+          ctx.drawImage(sprite(name), Math.round(this.hx + 6 - w / 2), Math.round(hy + 8 - hh / 2), w, hh);
+        }
       }
+      if (this.opts.afterHero) this.opts.afterHero(ctx, this);
       this.drawWeather();
       // particles
       for (const p of this.particles) {
@@ -621,8 +641,36 @@
     renderStill(t) { this.t = t || 1.3; this._dt = 0; this.draw(); return this; }
   }
 
+  /* Swirling pixel portal. size 0..1 grows/shrinks it, colors = [main, light, dark] */
+  function drawPortal(ctx, cx, cy, t, colors, size) {
+    const sc = size === undefined ? 1 : size;
+    if (sc <= 0) return;
+    const rx = Math.max(1, Math.round(8 * sc)), ry = Math.max(1, Math.round(13 * sc));
+    for (let dy = -ry - 3; dy <= ry + 3; dy++) {
+      for (let dx = -rx - 3; dx <= rx + 3; dx++) {
+        const d = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+        let col = null;
+        if (d < 0.18) col = "#ffffff";
+        else if (d < 1) {
+          const a = Math.atan2(dy / ry, dx / rx);
+          const band = Math.floor(Math.sqrt(d) * 5 - t * 4 + a / Math.PI * 2);
+          col = colors[((band % 3) + 3) % 3];
+        } else if (d < 1.35) col = "#0b1020";
+        else if (d < 1.9 && ((dx + dy + Math.floor(t * 8)) & 3) === 0) col = colors[1];
+        if (col) { ctx.fillStyle = col; ctx.fillRect(cx + dx, cy + dy, 1, 1); }
+      }
+    }
+    // orbiting sparks
+    for (let i = 0; i < 6; i++) {
+      const a = t * 3 + i * Math.PI / 3, r = 1.6 + 0.3 * Math.sin(t * 5 + i);
+      ctx.fillStyle = i % 2 ? "#ffffff" : colors[1];
+      ctx.fillRect(Math.round(cx + Math.cos(a) * rx * r), Math.round(cy + Math.sin(a) * ry * r * 0.8), 1, 1);
+    }
+  }
+
   function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
   window.Bitwood.PixelScene = PixelScene;
+  window.Bitwood.drawPortal = drawPortal;
   window.Bitwood.THEMES = THEMES;
 })();

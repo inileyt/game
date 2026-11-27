@@ -43,24 +43,35 @@
     const canvas = document.getElementById("scene");
     if (!canvas) return;
     const out = document.getElementById("coin-count"), hud = document.getElementById("hud");
+    let lastCoins = 0, activeUntil = 0, coinSave = 0;
     const scene = new B.PixelScene(canvas, {
       theme: "dawn",
       heroFrac: window.innerWidth < 640 ? 0.1 : 0.16,
       onCoin(n) {
         out.textContent = String(n).padStart(3, "0");
         hud.classList.remove("pop"); void hud.offsetWidth; hud.classList.add("pop");
+        // count coins toward the Coin Collector badge (saved in small batches)
+        const delta = n - lastCoins; lastCoins = n;
+        coinSave += delta;
+        if (coinSave >= 5) { B.Store.bumpStat("coins", coinSave); coinSave = 0; B.checkBadges(); }
+      },
+      // game sounds only while the player is actually playing (jumped in the last 8 seconds)
+      onEvent(name, byUser) {
+        if (byUser) activeUntil = performance.now() + 8000;
+        if (B.Sound && performance.now() < activeUntil) B.Sound.play(name);
       }
     }).start();
+    window.addEventListener("pagehide", () => { if (coinSave > 0) { B.Store.bumpStat("coins", coinSave); coinSave = 0; } });
     const heroSection = canvas.closest(".hero");
     document.addEventListener("keydown", e => {
       if ((e.code === "Space" || e.key === "ArrowUp") && !/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(document.activeElement.tagName)) {
         const r = heroSection.getBoundingClientRect();
-        if (r.bottom > 0 && r.top < window.innerHeight) { e.preventDefault(); scene.jump(); }
+        if (r.bottom > 0 && r.top < window.innerHeight) { e.preventDefault(); scene.jump(true); }
       }
     });
     heroSection.addEventListener("pointerdown", e => {
       if (e.target.closest("a, button")) return;
-      scene.jump();
+      scene.jump(true);
     });
   }
 
@@ -121,6 +132,56 @@
     } else start();
   }
 
+  /* Numbers in the stats band come straight from the level data */
+  function stats() {
+    const L = window.BITWOOD_LEVELS;
+    const vals = {
+      levels: L.length,
+      questions: L.reduce((s, l) => s + (l.questions ? l.questions.length : 5), 0),
+      xp: L.reduce((s, l) => s + l.xp, 0),
+      stars: L.length * 3
+    };
+    document.querySelectorAll("[data-stat]").forEach(el => {
+      const v = vals[el.dataset.stat];
+      if (v === undefined) return;
+      el.dataset.count = v;
+      el.textContent = v;
+    });
+  }
+
+  /* Contact form: validates, then opens the visitor's email app with the message filled in */
+  function contactForm() {
+    const form = document.getElementById("contact-form");
+    if (!form) return;
+    const err = document.getElementById("cf-error"), ok = document.getElementById("cf-ok");
+    const fields = { name: form.elements.name, email: form.elements.email, message: form.elements.message };
+    Object.values(fields).forEach(f => f.addEventListener("input", () => { f.removeAttribute("aria-invalid"); err.hidden = true; }));
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      ok.hidden = true;
+      const name = fields.name.value.trim(), email = fields.email.value.trim(), message = fields.message.value.trim();
+      const problems = [];
+      if (!name) problems.push([fields.name, "Please tell us your name."]);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) problems.push([fields.email, "Please enter a valid email address."]);
+      if (message.length < 5) problems.push([fields.message, "Please write a message (at least 5 characters)."]);
+      if (problems.length) {
+        problems.forEach(([f]) => f.setAttribute("aria-invalid", "true"));
+        err.textContent = problems.map(p => p[1]).join(" ");
+        err.hidden = false;
+        problems[0][0].focus();
+        if (B.Sound) B.Sound.play("fail");
+        return;
+      }
+      const topic = form.elements.topic.value;
+      const subject = "Bitwood — " + topic + " from " + name;
+      const body = message + "\n\n— " + name + " (" + email + ")";
+      window.location.href = "mailto:innababajanyan06@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      ok.textContent = "Your email app should open now with the message ready. Just press send! If nothing happens, write to innababajanyan06@gmail.com.";
+      ok.hidden = false;
+      if (B.Sound) B.Sound.play("pass");
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     splitTitle();
     typewriter();
@@ -128,6 +189,8 @@
     tabs();
     const grid = document.getElementById("level-grid");
     if (grid) B.renderLevelCards(grid);
+    stats();
+    contactForm();
     // START takes returning players straight to their current level's map spot
     const done = Object.keys(B.Store.get().done).length;
     if (done > 0) {

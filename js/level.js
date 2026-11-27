@@ -1,136 +1,250 @@
-/* Level page: lesson, code editor with highlighting, sandboxed test runner. */
+/* Level page: lesson + five questions (quiz and code) + walking hero track + portal to the next level. */
 (function () {
   "use strict";
   const B = window.Bitwood;
   const LEVELS = window.BITWOOD_LEVELS;
+  const $ = id => document.getElementById(id);
 
-  /* ---------------- Syntax highlighting ---------------- */
-  const TOKEN = /(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\.|[^`\\])*`?)|\b(\d+(?:\.\d+)?)\b|\b(const|let|var|function|return|if|else|for|while|do|of|in|new|typeof|break|continue|switch|case|default|class|this)\b|\b(true|false|null|undefined|NaN)\b|([A-Za-z_$][\w$]*)(?=\s*\()/g;
-  function highlight(src) {
-    let out = "", last = 0, m;
-    TOKEN.lastIndex = 0;
-    while ((m = TOKEN.exec(src))) {
-      if (m[0] === "") { TOKEN.lastIndex++; continue; }
-      out += B.escapeHTML(src.slice(last, m.index));
-      const cls = m[1] ? "tok-c" : m[2] ? "tok-s" : m[3] ? "tok-n" : m[4] ? "tok-k" : m[5] ? "tok-b" : "tok-f";
-      out += '<span class="' + cls + '">' + B.escapeHTML(m[0]) + "</span>";
-      last = m.index + m[0].length;
-    }
-    return out + B.escapeHTML(src.slice(last));
-  }
+  let level, track, state;
 
-  const fmt = v => {
-    if (typeof v === "string") return JSON.stringify(v);
-    try { const s = JSON.stringify(v); return s === undefined ? String(v) : s; } catch (e) { return String(v); }
-  };
-
-  /* ---------------- Sandboxed runner (Web Worker + timeout) ---------------- */
-  const WORKER_SRC = `
-    self.onmessage = function (e) {
-      var d = e.data, logs = [];
-      function f(v) { if (typeof v === "string") return v; try { var s = JSON.stringify(v); return s === undefined ? String(v) : s; } catch (_) { return String(v); } }
-      var fakeConsole = { log: function () { logs.push(Array.prototype.map.call(arguments, f).join(" ")); } };
-      fakeConsole.info = fakeConsole.warn = fakeConsole.error = fakeConsole.log;
-      var fn;
-      try {
-        fn = new Function("console", d.code + "\\n;return (typeof " + d.fn + " === 'function') ? " + d.fn + " : undefined;")(fakeConsole);
-      } catch (err) {
-        self.postMessage({ error: (err && err.name ? err.name + ": " : "") + (err && err.message ? err.message : String(err)), logs: logs });
-        return;
-      }
-      if (typeof fn !== "function") { self.postMessage({ error: "I can't find a function called " + d.fn + "(). Did you rename it?", logs: logs }); return; }
-      var results = d.tests.map(function (t) {
-        try {
-          var out = fn.apply(null, JSON.parse(JSON.stringify(t.args)));
-          var pass = JSON.stringify(out) === JSON.stringify(t.expected) && typeof out === typeof t.expected;
-          var shown; try { shown = JSON.stringify(out); } catch (_) { shown = String(out); }
-          return { pass: pass, got: shown === undefined ? "undefined" : shown };
-        } catch (err) {
-          return { pass: false, got: (err && err.name ? err.name + ": " : "") + (err && err.message ? err.message : String(err)), threw: true };
-        }
-      });
-      self.postMessage({ results: results, logs: logs });
-    };`;
-
-  let workerURL = null;
-  function runCode(code, level) {
-    const payload = { code, fn: level.fn, tests: level.tests };
-    return new Promise(resolve => {
-      let worker;
-      try {
-        if (!workerURL) workerURL = URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }));
-        worker = new Worker(workerURL);
-      } catch (e) {
-        resolve(runInline(payload));
-        return;
-      }
-      const timer = setTimeout(() => {
-        worker.terminate();
-        resolve({ error: "Your code ran for too long (over 2 seconds). Is there a loop that never ends?", logs: [] });
-      }, 2000);
-      worker.onmessage = e => { clearTimeout(timer); worker.terminate(); resolve(e.data); };
-      worker.onerror = e => { e.preventDefault(); clearTimeout(timer); worker.terminate(); resolve({ error: e.message || "Something went wrong running your code.", logs: [] }); };
-      worker.postMessage(payload);
-    });
-  }
-  /* Fallback when workers are unavailable (no timeout protection) */
-  function runInline(d) {
-    const logs = [];
-    const fakeConsole = { log: (...a) => logs.push(a.map(v => typeof v === "string" ? v : fmt(v)).join(" ")) };
-    let fn;
-    try { fn = new Function("console", d.code + "\n;return (typeof " + d.fn + " === 'function') ? " + d.fn + " : undefined;")(fakeConsole); }
-    catch (err) { return { error: err.name + ": " + err.message, logs }; }
-    if (typeof fn !== "function") return { error: "I can't find a function called " + d.fn + "(). Did you rename it?", logs };
-    return {
-      logs, results: d.tests.map(t => {
-        try {
-          const out = fn(...JSON.parse(JSON.stringify(t.args)));
-          return { pass: JSON.stringify(out) === JSON.stringify(t.expected) && typeof out === typeof t.expected, got: out === undefined ? "undefined" : fmt(out) };
-        } catch (err) { return { pass: false, got: err.name + ": " + err.message, threw: true }; }
-      })
-    };
-  }
-
-  /* ---------------- Page ---------------- */
   function getLevel() {
     const id = parseInt(new URLSearchParams(location.search).get("id"), 10);
     return LEVELS.find(l => l.id === id) || LEVELS[0];
   }
 
-  function init() {
-    const level = getLevel();
-    document.title = "Level " + level.id + ": " + level.name + " — Bitwood";
-    document.getElementById("level-lv").textContent = "Level " + level.id + " · " + level.topic;
-    document.getElementById("level-title").textContent = level.name;
-    document.getElementById("file-name").textContent = level.slug + ".js";
-
-    new B.PixelScene(document.getElementById("banner"), { theme: level.theme, pixel: 3, heroFrac: 0.82, speed: 26, seed: level.id }).start();
-
-    if (!B.Store.isUnlocked(level.id)) { renderLocked(level); return; }
-
-    // lesson
-    const body = document.getElementById("lesson-body");
-    let html = '<span class="eyebrow" style="color:' + level.color + '">Lesson · ' + B.escapeHTML(level.topic) + "</span>";
-    level.lesson.forEach(block => {
-      if (block.p) html += "<p>" + block.p + "</p>";
-      if (block.code) html += "<pre><code>" + highlight(block.code) + "</code></pre>";
-    });
-    body.innerHTML = html;
-    body.style.display = "flex"; body.style.flexDirection = "column"; body.style.gap = "14px";
-    document.getElementById("task").innerHTML = level.task;
-    document.getElementById("hint").innerHTML = level.hint;
-    const testsEl = document.getElementById("tests");
-    testsEl.innerHTML = level.tests.map((t, i) =>
-      '<li data-i="' + i + '"><span class="dot" aria-hidden="true"></span><span><span class="sr-only status">Not run. </span>' +
-      B.escapeHTML(level.fn + "(" + t.args.map(fmt).join(", ") + ")") + " → " + B.escapeHTML(fmt(t.expected)) +
-      '<span class="got"></span></span></li>').join("");
-
-    setupEditor(level);
+  /* ---------- per-level question progress (resumable) ---------- */
+  function loadState() {
+    const d = B.Store.get();
+    const q = (d.qprog || {})[level.id];
+    if (!q || q.step >= level.questions.length) return { step: 0, mistakes: 0, hints: 0 };
+    return { step: q.step, mistakes: q.mistakes || 0, hints: q.hints || 0 };
+  }
+  function saveState() {
+    B.Store.update(d => { d.qprog = d.qprog || {}; d.qprog[level.id] = Object.assign({}, state); });
   }
 
-  function renderLocked(level) {
-    const play = document.getElementById("play");
+  /* ---------- the quest track: 5 checkpoints + a portal, with a walking hero ---------- */
+  function buildTrack() {
+    const el = $("track");
+    const n = level.questions.length;
+    let html = '<div class="track-line"><i id="track-fill"></i></div>';
+    for (let i = 0; i < n; i++) {
+      const q = level.questions[i];
+      html += '<span class="track-node" data-i="' + i + '" title="Question ' + (i + 1) + '"><b>' + (i + 1) + '</b><em>' + (q.type === "quiz" ? "Quiz" : "Code") + "</em></span>";
+    }
+    html += '<span class="track-node track-portal" title="Portal to the next level"><canvas width="30" height="36" aria-hidden="true"></canvas><em>Portal</em></span>';
+    html += '<div class="track-hero" id="track-hero" aria-hidden="true"><img class="pixelated" alt=""></div>';
+    el.innerHTML = html;
+    el.setAttribute("aria-label", "Level progress: " + n + " questions, then the portal");
+
+    const heroEl = $("track-hero"), img = heroEl.querySelector("img");
+    const frames = [B.spriteURL("heroA", 4), B.spriteURL("heroB", 4)];
+    img.src = frames[0];
+    let walkTimer = 0;
+
+    // animated mini portal at the end of the track
+    const pc = el.querySelector(".track-portal canvas"), pctx = pc.getContext("2d");
+    const colors = B.Cutscene.portalColors(nextColor());
+    let pt = 0;
+    (function spin() {
+      pctx.clearRect(0, 0, 30, 36);
+      B.drawPortal(pctx, 15, 18, pt, colors, 0.95);
+      pt += 1 / 30;
+      if (!B.reduceMotion && document.body.contains(pc)) setTimeout(() => requestAnimationFrame(spin), 33);
+    })();
+
+    function nodeX(i) {
+      const nodes = el.querySelectorAll(".track-node");
+      const node = nodes[Math.min(i, nodes.length - 1)];
+      return node.offsetLeft + node.offsetWidth / 2;
+    }
+    function update(step) {
+      el.querySelectorAll(".track-node[data-i]").forEach((node, i) => {
+        node.classList.toggle("is-done", i < step);
+        node.classList.toggle("is-current", i === step);
+      });
+      $("track-fill").style.transform = "scaleX(" + Math.min(1, step / level.questions.length) + ")";
+    }
+    function place(step, animate) {
+      heroEl.classList.toggle("no-anim", !animate);
+      heroEl.style.left = nodeX(step) + "px";
+      update(step);
+      if (!animate || B.reduceMotion) return Promise.resolve();
+      heroEl.classList.add("is-walking");
+      let f = 0;
+      clearInterval(walkTimer);
+      walkTimer = setInterval(() => { img.src = frames[(f = f ^ 1)]; }, 130);
+      return new Promise(res => setTimeout(() => {
+        clearInterval(walkTimer); img.src = frames[0];
+        heroEl.classList.remove("is-walking");
+        heroEl.classList.add("is-cheer");
+        setTimeout(() => heroEl.classList.remove("is-cheer"), 500);
+        res();
+      }, 950));
+    }
+    window.addEventListener("resize", () => place(state.step, false));
+    return { place };
+  }
+
+  function nextColor() {
+    const next = LEVELS[level.id];
+    return next ? next.color : "#facc15";
+  }
+
+  /* ---------- question rendering ---------- */
+  function showQuestion(i) {
+    const q = level.questions[i];
+    const card = $("q-card");
+    $("q-step").textContent = "Question " + (i + 1) + " / " + level.questions.length;
+    $("q-type").textContent = q.type === "quiz" ? "Quiz" : "Code";
+    $("q-title").textContent = q.type === "quiz" ? "Quick quiz" : (i === level.questions.length - 1 ? "Level challenge" : "Warm-up: " + q.title);
+    $("q-text").innerHTML = q.type === "quiz" ? q.q : q.task;
+    const codeEl = $("q-code");
+    if (q.type === "quiz" && q.code) { codeEl.hidden = false; codeEl.firstChild.innerHTML = B.Code.highlight(q.code); }
+    else codeEl.hidden = true;
+    $("q-feedback").hidden = true;
+    $("q-next").hidden = true;
+    $("quiz-area").hidden = q.type !== "quiz";
+    $("code-q-area").hidden = q.type !== "code";
+    $("editor-panel").hidden = q.type !== "code";
+
+    if (q.type === "quiz") renderQuiz(q);
+    else renderCode(q, i);
+
+    card.classList.remove("swap"); void card.offsetWidth; card.classList.add("swap");
+  }
+
+  function feedback(html, ok) {
+    const fb = $("q-feedback");
+    fb.hidden = false;
+    fb.className = "q-feedback " + (ok ? "ok" : "bad");
+    fb.innerHTML = html;
+  }
+
+  function renderQuiz(q) {
+    const wrap = $("q-options");
+    const letters = ["A", "B", "C", "D"];
+    wrap.innerHTML = q.options.map((o, i) =>
+      '<button type="button" class="q-opt" data-i="' + i + '"><span class="q-letter">' + letters[i] + "</span><code>" + B.escapeHTML(o) + "</code></button>").join("");
+    wrap.querySelectorAll(".q-opt").forEach(btn => btn.addEventListener("click", () => {
+      const pick = +btn.dataset.i;
+      if (pick === q.answer) {
+        btn.classList.add("is-right");
+        wrap.querySelectorAll(".q-opt").forEach(b => { b.disabled = true; });
+        if (B.Sound) B.Sound.play("pass");
+        feedback("<b>Correct!</b> " + q.explain, true);
+        showContinue();
+      } else {
+        btn.classList.add("is-wrong");
+        btn.disabled = true;
+        state.mistakes++; saveState();
+        if (B.Sound) B.Sound.play("fail");
+        feedback("<b>Not quite.</b> Try another answer!", false);
+      }
+    }));
+  }
+
+  function renderCode(q, i) {
+    const isMain = i === level.questions.length - 1;
+    const key = isMain ? level.id : level.id + "-" + i;
+    $("file-name").textContent = q.slug + ".js";
+    const saved = B.Store.get().code[key];
+    B.Code.mountChallenge(q, {
+      initial: typeof saved === "string" ? saved : q.starter,
+      onSave: code => B.Store.saveCode(key, code),
+      winText: isMain ? "level clear!" : "question solved!",
+      quietWin: !isMain,
+      onWin: r => {
+        state.mistakes += r.fails;
+        if (r.hintUsed) state.hints++;
+        saveState();
+        if (isMain) { completeLevel(); return; }
+        feedback("<b>All tests passed!</b> Great coding.", true);
+        showContinue();
+      }
+    });
+  }
+
+  function showContinue() {
+    const btn = B.Code.fresh("q-next");
+    btn.hidden = false;
+    btn.focus({ preventScroll: true });
+    btn.addEventListener("click", async () => {
+      btn.hidden = true;
+      state.step++;
+      saveState();
+      await showTrack();
+      await track.place(state.step, true);
+      showQuestion(state.step);
+    });
+  }
+
+  /* Bring the quest track into view so the player sees the hero walk */
+  function showTrack() {
+    const strip = document.querySelector(".track-strip");
+    const navH = (document.querySelector(".nav") || {}).offsetHeight || 0;
+    const top = strip.getBoundingClientRect().top + window.scrollY - navH - 8;
+    if (Math.abs(window.scrollY - top) < 40) return Promise.resolve();
+    window.scrollTo({ top, behavior: B.reduceMotion ? "auto" : "smooth" });
+    return new Promise(res => setTimeout(res, B.reduceMotion ? 0 : 450));
+  }
+
+  /* ---------- level complete ---------- */
+  async function completeLevel() {
+    const stars = Math.max(1, 3 - (state.hints > 0 ? 1 : 0) - (state.mistakes >= 3 ? 1 : 0) - (state.mistakes >= 6 ? 1 : 0));
+    const already = B.Store.isDone(level.id);
+    B.Store.complete(level.id, { xp: level.xp, stars, at: Date.now() });
+    state.step = level.questions.length;
+    saveState();
+    B.updateXP(true);
+    await showTrack();
+    await track.place(state.step, true);
+
+    const starsEl = $("win-stars");
+    starsEl.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+      const img = document.createElement("img");
+      img.src = B.spriteURL("star", 4); img.alt = ""; img.className = "pixelated" + (i < stars ? "" : " off");
+      starsEl.appendChild(img);
+    }
+    starsEl.setAttribute("aria-label", stars + " of 3 stars");
+    const last = level.id === LEVELS.length;
+    const next = LEVELS[level.id];
+    $("win-title").textContent = last ? "Boss defeated!" : "Level clear!";
+    $("win-text").textContent = last
+      ? "You conquered all ten worlds of Bitwood. You're a real coder now — claim your certificate!"
+      : "All 5 questions solved. The portal to " + next.name + " is open!";
+    $("win-xp").textContent = already ? "Replay complete" : "+" + level.xp + " XP";
+    const nextBtn = B.Code.fresh("win-next");
+    const allDone = LEVELS.every(l => B.Store.isDone(l.id));
+    if (last) {
+      nextBtn.href = allDone ? "certificate.html" : "levels.html";
+      nextBtn.querySelector(".t-label").textContent = allDone ? "Certificate" : "World map";
+    } else {
+      nextBtn.href = "level.html?id=" + next.id;
+      nextBtn.querySelector(".t-label").textContent = "Enter portal";
+      nextBtn.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+        B.Cutscene.portal({
+          fromId: level.id, toId: next.id, theme: level.theme, color: next.color,
+          href: "level.html?id=" + next.id,
+          kicker: "Level " + level.id + " clear!", title: "Next: Level " + next.id + " · " + next.name
+        });
+      });
+    }
+    const closeModal = B.openModal($("win"));
+    const r = $("track").getBoundingClientRect();
+    B.confetti(r.right - 40, r.top + 20, 140);
+    B.checkBadges();
+  }
+
+  /* ---------- page ---------- */
+  function renderLocked() {
+    const play = $("play");
     const prev = LEVELS[level.id - 2];
+    document.querySelector(".track-strip").hidden = true;
     play.style.display = "block";
     play.innerHTML =
       '<div class="pixel-box" style="max-width:560px;margin:0 auto;padding:36px 28px;text-align:center">' +
@@ -140,165 +254,29 @@
       '<a class="btn btn-start" href="level.html?id=' + prev.id + '"><span class="t-label">Go to level ' + prev.id + "</span></a></div>";
   }
 
-  function setupEditor(level) {
-    const ta = document.getElementById("code"), hl = document.getElementById("hl"), gutter = document.getElementById("gutter");
-    const pre = hl.parentElement;
-    const saved = B.Store.get().code[level.id];
-    ta.value = typeof saved === "string" ? saved : level.starter;
+  function init() {
+    level = getLevel();
+    document.title = "Level " + level.id + ": " + level.name + " — Bitwood";
+    $("level-lv").textContent = "Level " + level.id + " · " + level.topic;
+    $("level-title").textContent = level.name;
 
-    let saveTimer = 0;
-    function refresh() {
-      hl.innerHTML = highlight(ta.value) + "\n";
-      const lines = ta.value.split("\n").length;
-      let g = "";
-      for (let i = 1; i <= lines; i++) g += i + "\n";
-      gutter.textContent = g;
-      syncScroll();
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => B.Store.saveCode(level.id, ta.value), 300);
-    }
-    function syncScroll() {
-      pre.scrollTop = ta.scrollTop; pre.scrollLeft = ta.scrollLeft; gutter.scrollTop = ta.scrollTop;
-    }
-    function insert(text) {
-      ta.focus();
-      let ok = false;
-      try { ok = document.execCommand("insertText", false, text); } catch (e) { ok = false; }
-      if (!ok) { ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, "end"); refresh(); }
-    }
-    ta.addEventListener("input", refresh);
-    ta.addEventListener("scroll", syncScroll);
-    ta.addEventListener("keydown", e => {
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); return; }
-      if (e.key === "Tab" && !e.shiftKey && !e.altKey) {
-        // Tab indents; press Escape first to move focus out of the editor with Tab
-        if (ta.dataset.escaped === "1") { ta.dataset.escaped = ""; return; }
-        e.preventDefault(); insert("  "); return;
-      }
-      if (e.key === "Escape") { ta.dataset.escaped = "1"; return; }
-      if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
-        const before = ta.value.slice(0, ta.selectionStart);
-        const line = before.slice(before.lastIndexOf("\n") + 1);
-        let indent = (line.match(/^\s*/) || [""])[0];
-        if (/[{[(]\s*$/.test(line)) indent += "  ";
-        e.preventDefault(); insert("\n" + indent);
-      }
-      ta.dataset.escaped = "";
+    const hooks = B.Cutscene.arrivalHooks(level.id, level.color);
+    new B.PixelScene($("banner"), Object.assign({ theme: level.theme, pixel: 3, heroFrac: 0.82, speed: 26, seed: level.id }, hooks)).start();
+
+    if (!B.Store.isUnlocked(level.id)) { renderLocked(); return; }
+
+    const body = $("lesson-body");
+    let html = '<span class="eyebrow" style="color:' + level.color + '">Lesson · ' + B.escapeHTML(level.topic) + "</span>";
+    level.lesson.forEach(block => {
+      if (block.p) html += "<p>" + block.p + "</p>";
+      if (block.code) html += "<pre><code>" + B.Code.highlight(block.code) + "</code></pre>";
     });
-    refresh();
+    body.innerHTML = html;
 
-    const runBtn = document.getElementById("run");
-    const consoleEl = document.getElementById("console");
-    const hintBox = document.getElementById("hint-box");
-    let fails = 0, hintUsed = false, busy = false;
-
-    function log(text, cls) {
-      const d = document.createElement("div");
-      d.className = "line " + (cls || "log");
-      d.textContent = text;
-      consoleEl.appendChild(d);
-      consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
-
-    async function run() {
-      if (busy) return;
-      busy = true;
-      runBtn.setAttribute("aria-busy", "true");
-      runBtn.querySelector(".t-label").textContent = "Running";
-      consoleEl.innerHTML = "";
-      log("$ node " + level.slug + ".js", "muted");
-      const res = await runCode(ta.value, level);
-      busy = false;
-      runBtn.removeAttribute("aria-busy");
-      runBtn.querySelector(".t-label").textContent = "Run ▶";
-      (res.logs || []).forEach(l => log(l, "log"));
-      const items = document.querySelectorAll("#tests li");
-      items.forEach(li => { li.classList.remove("pass", "fail"); li.querySelector(".got").textContent = ""; li.querySelector(".status").textContent = "Not run. "; });
-      if (res.error) {
-        fails++;
-        log("✗ " + res.error, "err");
-        return;
-      }
-      let passed = 0;
-      res.results.forEach((r, i) => {
-        const li = items[i];
-        li.classList.add(r.pass ? "pass" : "fail");
-        li.querySelector(".status").textContent = r.pass ? "Passed. " : "Failed. ";
-        if (r.pass) passed++;
-        else li.querySelector(".got").textContent = (r.threw ? "error: " : "got: ") + r.got;
-      });
-      const total = res.results.length;
-      if (passed === total) {
-        log("✓ " + passed + " / " + total + " tests passed — level clear!", "ok");
-        win(level, fails, hintUsed);
-      } else {
-        fails++;
-        log("✗ " + passed + " / " + total + " tests passed. Check the red tests on the left.", "err");
-        if (fails >= 2 && !hintBox.classList.contains("is-open")) log("Tip: stuck? Press Hint for a nudge.", "muted");
-      }
-    }
-
-    runBtn.addEventListener("click", run);
-    document.getElementById("hint-btn").addEventListener("click", () => {
-      hintUsed = true;
-      hintBox.classList.add("is-open");
-      hintBox.scrollIntoView({ behavior: B.reduceMotion ? "auto" : "smooth", block: "nearest" });
-    });
-    document.getElementById("reset-code").addEventListener("click", () => {
-      if (ta.value !== level.starter && !window.confirm("Replace your code with the starter code?")) return;
-      ta.value = level.starter;
-      refresh();
-      ta.focus();
-    });
-  }
-
-  function win(level, fails, hintUsed) {
-    const stars = Math.max(1, 3 - (hintUsed ? 1 : 0) - (fails >= 3 ? 1 : 0));
-    const already = B.Store.isDone(level.id);
-    B.Store.complete(level.id, { xp: level.xp, stars, at: Date.now() });
-    B.updateXP(true);
-
-    const modal = document.getElementById("win");
-    const starsEl = document.getElementById("win-stars");
-    starsEl.innerHTML = "";
-    for (let i = 0; i < 3; i++) {
-      const img = document.createElement("img");
-      img.src = B.spriteURL("star", 4); img.alt = ""; img.className = "pixelated" + (i < stars ? "" : " off");
-      starsEl.appendChild(img);
-    }
-    starsEl.setAttribute("aria-label", stars + " of 3 stars");
-    const last = level.id === LEVELS.length;
-    document.getElementById("win-title").textContent = last ? "Boss defeated!" : "Level clear!";
-    document.getElementById("win-text").textContent = last
-      ? "You conquered all ten worlds of Bitwood. You're a real coder now!"
-      : "The path to " + LEVELS[level.id].name + " is open.";
-    document.getElementById("win-xp").textContent = already ? "Replay complete" : "+" + level.xp + " XP";
-    const next = document.getElementById("win-next");
-    next.href = last ? "levels.html" : "level.html?id=" + (level.id + 1);
-    next.querySelector(".t-label").textContent = last ? "World map" : "Next level";
-
-    const opener = document.activeElement;
-    modal.classList.add("is-open");
-    next.focus();
-    const r = document.getElementById("run").getBoundingClientRect();
-    B.confetti(r.left + r.width / 2, r.top, 140);
-    function close() {
-      modal.classList.remove("is-open");
-      document.removeEventListener("keydown", onKey);
-      if (opener && opener.focus) opener.focus();
-    }
-    function onKey(e) {
-      if (e.key === "Escape") close();
-      if (e.key === "Tab") { // simple focus trap
-        const f = [next, document.getElementById("win-stay")];
-        const i = f.indexOf(document.activeElement);
-        e.preventDefault();
-        f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    document.getElementById("win-stay").onclick = close;
-    modal.onclick = e => { if (e.target === modal) close(); };
+    state = loadState();
+    track = buildTrack();
+    requestAnimationFrame(() => track.place(state.step, false));
+    showQuestion(state.step);
   }
 
   document.addEventListener("DOMContentLoaded", init);
