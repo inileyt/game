@@ -18,7 +18,7 @@
   <div class="promo" role="region" aria-label="Announcement">
     <span class="blink-star" aria-hidden="true"></span>
     <span class="eyebrow">New world</span>
-    <span class="t"><strong>5 new levels</strong> — snow peaks, a volcano &amp; the Star Citadel boss</span>
+    <span class="t"><strong>New!</strong> 5 questions per level, daily challenges, badges &amp; a code playground</span>
     <a class="btn btn-code" href="levels.html">See the map
       <svg width="16" height="16" viewBox="0 0 16 16" fill="#75d1ff" aria-hidden="true" shape-rendering="crispEdges"><path d="M5 2h2v2h2v2h2v4H9v2H7v2H5v-2h2v-2h2V6H7V4H5z"/></svg>
     </a>
@@ -36,8 +36,9 @@
       <nav class="nav-links" id="nav-links">
         <a class="btn btn-ghost is-active" href="index.html" aria-current="page">Home</a>
         <a class="btn btn-ghost" href="levels.html">World map</a>
-        <a class="btn btn-ghost" href="index.html#quests">Quests</a>
-        <a class="btn btn-ghost" href="index.html#how">How to play</a>
+        <a class="btn btn-ghost" href="daily.html">Daily</a>
+        <a class="btn btn-ghost" href="playground.html">Playground</a>
+        <a class="btn btn-ghost" href="badges.html">Badges</a>
         <a class="btn btn-ghost" href="index.html#contact">Contact</a>
       </nav>
       <div class="nav-right">
@@ -127,14 +128,30 @@
       </div>
     </section>
 
+    <!-- ============ More ways to play ============ -->
+    <section class="section" id="more" aria-labelledby="more-title">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <h2 class="section-title" id="more-title">More ways to play</h2>
+          <p class="section-lead">Keep your coding streak alive, build anything you like and collect every badge.</p>
+        </div>
+        <div class="more-grid">
+          <a class="pixel-box more-card" href="daily.html" data-reveal><img data-sprite="scroll" data-scale="5" alt=""><h3>Daily challenge</h3><p>A fresh puzzle every day. +50 XP and a streak counter.</p></a>
+          <a class="pixel-box more-card" href="playground.html" data-reveal style="--d:80ms"><img data-sprite="potion" data-scale="5" alt=""><h3>Playground</h3><p>Write any code and paint pixel art with <code>pixel(x, y)</code>.</p></a>
+          <a class="pixel-box more-card" href="badges.html" data-reveal style="--d:160ms"><img data-sprite="medal" data-scale="5" alt=""><h3>Badges</h3><p>11 badges to collect — can you get them all?</p></a>
+          <a class="pixel-box more-card" href="certificate.html" data-reveal style="--d:240ms"><img data-sprite="trophy" data-scale="5" alt=""><h3>Certificate</h3><p>Beat all 10 worlds and download a certificate with your name.</p></a>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ Stats ============ -->
     <section class="section" aria-label="Bitwood in numbers">
       <div class="container">
         <div class="stats">
-          <div class="stat" data-reveal><b data-count="10">10</b><span>Levels</span></div>
-          <div class="stat" data-reveal style="--d:80ms"><b data-count="46">46</b><span>Hidden tests</span></div>
-          <div class="stat" data-reveal style="--d:160ms"><b data-count="3300">3300</b><span>XP to earn</span></div>
-          <div class="stat" data-reveal style="--d:240ms"><b data-count="30">30</b><span>Stars to collect</span></div>
+          <div class="stat" data-reveal><b data-count="10" data-stat="levels">10</b><span>Levels</span></div>
+          <div class="stat" data-reveal style="--d:80ms"><b data-count="50" data-stat="questions">50</b><span>Questions</span></div>
+          <div class="stat" data-reveal style="--d:160ms"><b data-count="3300" data-stat="xp">3300</b><span>XP to earn</span></div>
+          <div class="stat" data-reveal style="--d:240ms"><b data-count="30" data-stat="stars">30</b><span>Stars to collect</span></div>
         </div>
       </div>
     </section>
@@ -150,7 +167,7 @@
             <img class="ico" data-sprite="scroll" data-scale="4" alt="">
             <span class="num">Step 01</span>
             <h3>Read the scroll</h3>
-            <p>Each level starts with a short lesson and code examples.</p>
+            <p>Each level has a short lesson, then 5 questions — quick quizzes and coding tasks.</p>
           </article>
           <article class="pixel-box step" data-reveal style="--d:100ms">
             <img class="ico" data-sprite="sword" data-scale="4" alt="">
@@ -190,6 +207,39 @@
             </div>
           </div>
         </div>
+
+        <form class="pixel-box contact-form" id="contact-form" novalidate data-reveal style="--d:100ms" aria-labelledby="cf-title">
+          <h3 id="cf-title"><img data-sprite="scroll" data-scale="2" alt="">Send a message</h3>
+          <div class="field-row">
+            <div class="field">
+              <label for="cf-name">Your name</label>
+              <input id="cf-name" name="name" type="text" autocomplete="name" maxlength="60" required>
+            </div>
+            <div class="field">
+              <label for="cf-email">Your email</label>
+              <input id="cf-email" name="email" type="email" autocomplete="email" maxlength="120" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cf-topic">Topic</label>
+            <select id="cf-topic" name="topic">
+              <option>Question</option>
+              <option>Idea for Bitwood</option>
+              <option>Bug report</option>
+              <option>Partnership</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" rows="5" maxlength="2000" required></textarea>
+          </div>
+          <p class="form-error" id="cf-error" role="alert" hidden></p>
+          <div class="form-actions">
+            <button class="btn btn-start sm" type="submit"><span class="t-label">Send ✉</span></button>
+            <span class="form-note">This opens your email app with the message ready to send to Inna.</span>
+          </div>
+          <p class="form-ok" id="cf-ok" role="status" hidden></p>
+        </form>
       </div>
     </section>
 
@@ -214,7 +264,7 @@
         </div>
         <div>
           <h4>Play</h4>
-          <ul><li><a href="levels.html">World map</a></li><li><a href="level.html?id=1">Level 1</a></li><li><a href="index.html#how">How to play</a></li></ul>
+          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="certificate.html">Certificate</a></li></ul>
         </div>
         <div>
           <h4>Worlds</h4>
@@ -238,6 +288,7 @@
 
   <script src="js/core.js"></script>
   <script src="js/scene.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/levels-data.js"></script>
   <script src="js/cards.js"></script>
   <script src="js/home.js"></script>

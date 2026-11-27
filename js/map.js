@@ -259,7 +259,7 @@
   }
 
   function initProgress() {
-    const total = LEVELS.reduce((s, l) => s + l.xp, 0), xp = B.Store.xp();
+    const total = LEVELS.reduce((s, l) => s + l.xp, 0), xp = B.Store.levelXP();
     const bar = document.getElementById("xp-fill");
     if (bar) requestAnimationFrame(() => bar.style.setProperty("--p", (xp / total).toFixed(3)));
     const txt = document.getElementById("xp-text");

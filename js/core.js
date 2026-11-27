@@ -131,6 +131,7 @@
       "KNK.......",
       "KKK......."
     ],
+    medal: ["KK....KK", "KBK..KRK", ".KBKKRK.", "..KKKK..", ".KYYYYK.", "KYYWYYOK", "KYWYYYOK", "KYYYYYOK", ".KOOOOK.", "..KKKK.."],
     lock: ["..KKKK..", ".KMMMMK.", ".KM..MK.", "KKKKKKKK", "KYYYYYYK", "KYYKKYYK", "KYYKKYYK", "KOOOOOOK", "KKKKKKKK"],
     crown: ["K...KK...K", "KK.KYYK.KK", "KYKYYYYKYK", "KYYYRYYYYK", "KYYYYYYYYK", "KYCYYRYCYK", "KOOOOOOOOK", "KKKKKKKKKK"],
     potion: ["..KKKK..", "..KNNK..", "..KWWK..", ".KKWWKK.", "KPPPPPPK", "KPWPPPPK", "KPPPPPPK", "KPPPPPPK", ".KPPPPK.", "..KKKK.."],
@@ -212,8 +213,14 @@
       const d = this.read();
       d.done = d.done || {};
       d.code = d.code || {};
+      d.badges = d.badges || {};
+      d.stats = d.stats || {};
+      d.daily = d.daily || { done: {}, streak: 0, best: 0, count: 0, xp: 0, last: "" };
+      d.daily.done = d.daily.done || {};
       return d;
     },
+    update(fn) { const d = this.get(); fn(d); this.write(d); return d; },
+    bumpStat(key, n) { return this.update(d => { d.stats[key] = (d.stats[key] || 0) + (n || 1); }); },
     complete(id, info) {
       const d = this.get();
       const prev = d.done[id];
@@ -225,11 +232,12 @@
     reset() { try { localStorage.removeItem(KEY); } catch (e) {} },
     isDone(id) { return !!this.get().done[id]; },
     isUnlocked(id) { return id === 1 || this.isDone(id - 1); },
-    xp() {
+    levelXP() {
       const d = this.get(); let xp = 0;
       Object.keys(d.done).forEach(k => { xp += d.done[k].xp || 0; });
       return xp;
     },
+    xp() { return this.levelXP() + (this.get().daily.xp || 0); },
     currentLevel(total) {
       for (let i = 1; i <= total; i++) if (!this.isDone(i)) return i;
       return total;
@@ -421,7 +429,87 @@
     return String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
 
-  window.Bitwood = { PAL, SPRITES, sprite, spriteURL, paintSprites, Store, Wipe, updateXP, initReveal, confetti, escapeHTML, reduceMotion };
+  /* ------------------------------------------------------------------ *
+   * Toasts
+   * ------------------------------------------------------------------ */
+  let toastWrap = null;
+  function toast(html, icon) {
+    if (!toastWrap) {
+      toastWrap = document.createElement("div");
+      toastWrap.className = "toasts";
+      toastWrap.setAttribute("role", "status");
+      toastWrap.setAttribute("aria-live", "polite");
+      document.body.appendChild(toastWrap);
+    }
+    const t = document.createElement("div");
+    t.className = "toast pixel-box";
+    t.innerHTML = (icon ? '<img class="pixelated" alt="" src="' + spriteURL(icon, 4) + '">' : "") + "<div>" + html + "</div>";
+    toastWrap.appendChild(t);
+    setTimeout(() => { t.classList.add("is-out"); setTimeout(() => t.remove(), 400); }, 4200);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Modal helper: open, trap focus, close on Escape / backdrop
+   * ------------------------------------------------------------------ */
+  function openModal(modal, onClose) {
+    const opener = document.activeElement;
+    modal.classList.add("is-open");
+    const focusables = () => [...modal.querySelectorAll("a[href], button:not([disabled]), input, textarea")].filter(el => el.offsetParent !== null);
+    const first = focusables()[0];
+    if (first) first.focus();
+    function close() {
+      modal.classList.remove("is-open");
+      document.removeEventListener("keydown", onKey);
+      modal.removeEventListener("click", onBackdrop);
+      if (opener && opener.focus) opener.focus();
+      if (onClose) onClose();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); close(); }
+      if (e.key === "Tab") {
+        const f = focusables(); if (!f.length) return;
+        const i = f.indexOf(document.activeElement);
+        e.preventDefault();
+        f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+      }
+    }
+    function onBackdrop(e) { if (e.target === modal) close(); }
+    document.addEventListener("keydown", onKey);
+    modal.addEventListener("click", onBackdrop);
+    modal.querySelectorAll("[data-close]").forEach(b => { b.onclick = close; });
+    return close;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Badges
+   * ------------------------------------------------------------------ */
+  const BADGES = [
+    { id: "first-steps", name: "First Steps", icon: "flag", desc: "Clear your first level.", test: d => Object.keys(d.done).length >= 1 },
+    { id: "sharp-mind", name: "Sharp Mind", icon: "star", desc: "Clear any level with 3 stars.", test: d => Object.values(d.done).some(x => x.stars === 3) },
+    { id: "knight", name: "Castle Knight", icon: "sword", desc: "Defeat the mid-boss in Object Castle (level 5).", test: d => !!d.done[5] },
+    { id: "world-tour", name: "World Tour", icon: "crown", desc: "Clear all 10 levels.", test: d => Object.keys(d.done).length >= 10 },
+    { id: "perfectionist", name: "Perfectionist", icon: "trophy", desc: "Get 3 stars on all 10 levels.", test: d => Object.keys(d.done).length >= 10 && Object.values(d.done).every(x => x.stars === 3) },
+    { id: "daily-hero", name: "Daily Hero", icon: "scroll", desc: "Solve a daily challenge.", test: d => (d.daily.count || 0) >= 1 },
+    { id: "on-fire", name: "On Fire", icon: "heart", desc: "Reach a 3-day daily streak.", test: d => (d.daily.best || 0) >= 3 },
+    { id: "tinkerer", name: "Tinkerer", icon: "potion", desc: "Run your own code in the Playground.", test: d => (d.stats.playRuns || 0) >= 1 },
+    { id: "pixel-artist", name: "Pixel Artist", icon: "gem", desc: "Draw pixel art with code in the Playground.", test: d => (d.stats.pixelArt || 0) >= 1 },
+    { id: "coin-collector", name: "Coin Collector", icon: "coin0", desc: "Collect 50 coins in the home page adventure.", test: d => (d.stats.coins || 0) >= 50 },
+    { id: "graduate", name: "Graduate", icon: "medal", desc: "Download your Bitwood certificate.", test: d => (d.stats.certificates || 0) >= 1 }
+  ];
+  function checkBadges() {
+    const d = Store.get();
+    const fresh = BADGES.filter(b => !d.badges[b.id] && b.test(d));
+    if (!fresh.length) return [];
+    fresh.forEach(b => { d.badges[b.id] = Date.now(); });
+    Store.write(d);
+    fresh.forEach((b, i) => setTimeout(() => {
+      toast('<span class="toast-k">Badge unlocked!</span><b>' + escapeHTML(b.name) + "</b>", b.icon);
+      if (window.Bitwood.Sound) window.Bitwood.Sound.play("badge");
+    }, 600 + i * 900));
+    return fresh;
+  }
+
+  window.Bitwood = { PAL, SPRITES, sprite, spriteURL, paintSprites, Store, Wipe, updateXP, initReveal, confetti, escapeHTML, reduceMotion, toast, openModal, BADGES, checkBadges };
 
   document.addEventListener("DOMContentLoaded", () => {
     Wipe.init();
@@ -432,5 +520,6 @@
     initCounters();
     const y = document.querySelector("[data-year]");
     if (y) y.textContent = new Date().getFullYear();
+    checkBadges();
   });
 })();

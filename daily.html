@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Challenge — Bitwood</title>
+  <meta name="description" content="A new small JavaScript coding challenge every day. Keep your streak going and earn XP.">
+  <meta name="theme-color" content="#020617">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Mulish:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav" aria-label="Main">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Bitwood home">
+        <img class="brand-mark" data-sprite="coin0" data-scale="4" alt="">
+        <span class="brand-name">Bitwood</span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a class="btn btn-ghost" href="index.html">Home</a>
+        <a class="btn btn-ghost" href="levels.html">World map</a>
+        <a class="btn btn-ghost is-active" href="daily.html" aria-current="page">Daily</a>
+        <a class="btn btn-ghost" href="playground.html">Playground</a>
+        <a class="btn btn-ghost" href="badges.html">Badges</a>
+        <a class="btn btn-ghost" href="index.html#contact">Contact</a>
+      </nav>
+      <div class="nav-right">
+        <span class="xp-chip" title="Your experience points"><img data-sprite="star" data-scale="2" alt=""><span data-xp>0</span> XP</span>
+        <a class="btn btn-start sm" href="levels.html"><span class="t-label">Play</span></a>
+        <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="level-banner" aria-labelledby="level-title">
+      <canvas id="banner" aria-hidden="true"></canvas>
+      <div class="container">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="levels.html">← World map</a></nav>
+        <span class="lv" id="level-lv">Daily challenge</span>
+        <h1 id="level-title">Loading…</h1>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="play" id="play">
+        <article class="pixel-box lesson" data-reveal>
+          <div class="daily-stats">
+            <div class="d-stat"><img data-sprite="heart" data-scale="3" alt=""><b id="d-streak">0</b><span>Day streak</span></div>
+            <div class="d-stat"><img data-sprite="trophy" data-scale="3" alt=""><b id="d-best">0</b><span>Best streak</span></div>
+            <div class="d-stat"><img data-sprite="scroll" data-scale="3" alt=""><b id="d-count">0</b><span>Solved</span></div>
+          </div>
+          <p class="d-status" id="d-status"></p>
+          <p class="d-next">Next challenge in <b id="d-next">--:--:--</b></p>
+          <div class="task">
+            <h3><img data-sprite="scroll" data-scale="2" alt="">Today's quest</h3>
+            <p id="task"></p>
+          </div>
+          <div>
+            <h2 class="q-sub">Tests</h2>
+            <ul class="tests" id="tests"></ul>
+          </div>
+          <div class="hint-box" id="hint-box"><p id="hint"></p></div>
+        </article>
+
+          <section class="pixel-box editor-panel" aria-label="Code editor">
+            <div class="win-bar"><i></i><i></i><i></i><span class="file" id="file-name">daily.js</span></div>
+            <div class="editor">
+              <div class="gutter" id="gutter" aria-hidden="true">1</div>
+              <div class="code-area">
+                <pre aria-hidden="true"><code id="hl"></code></pre>
+                <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Code editor"></textarea>
+              </div>
+            </div>
+            <div class="editor-actions">
+              <button class="btn btn-start sm" type="button" id="run"><span class="t-label">Run ▶</span></button>
+              <button class="btn btn-code" type="button" id="hint-btn">Hint</button>
+              <button class="btn btn-code" type="button" id="reset-code">Reset</button>
+              <span class="spacer"></span>
+              <span class="kbd">Ctrl + Enter to run</span>
+            </div>
+            <div class="console" id="console" role="log" aria-live="polite"><div class="line muted">// Output appears here. Press Run when you are ready.</div></div>
+          </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><img class="brand-mark" data-sprite="coin0" data-scale="4" alt=""><span class="brand-name">Bitwood</span></a>
+          <p style="margin-top:12px;font-size:15px;max-width:320px">A tiny pixel world for learning to code. Made for curious beginners of every age.</p>
+          <p style="margin-top:10px;font-size:15px">Founder: <b style="color:#f8fafc">Inna Babajanyan</b></p>
+        </div>
+        <div>
+          <h4>Play</h4>
+          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="certificate.html">Certificate</a></li></ul>
+        </div>
+        <div>
+          <h4>Worlds</h4>
+          <ul><li><a href="level.html?id=1">Variable Village</a></li><li><a href="level.html?id=5">Object Castle</a></li><li><a href="level.html?id=10">Star Citadel</a></li></ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:innababajanyan06@gmail.com">innababajanyan06@gmail.com</a></li>
+            <li><a href="tel:+37493186006">+374 93 186006</a></li>
+            <li><a href="index.html#contact">Meet the founder</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="fine">
+        <p>© <span data-year>2026</span> Bitwood · Founded by Inna Babajanyan. All pixels hand-placed.</p>
+        <p>Made with <img class="heart pixelated" data-sprite="heart" data-scale="2" alt="love"> and JavaScript</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/core.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/daily-data.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/daily.js"></script>
+</body>
+</html>

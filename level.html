@@ -24,8 +24,9 @@
       <nav class="nav-links" id="nav-links">
         <a class="btn btn-ghost" href="index.html">Home</a>
         <a class="btn btn-ghost" href="levels.html">World map</a>
-        <a class="btn btn-ghost" href="index.html#quests">Quests</a>
-        <a class="btn btn-ghost" href="index.html#how">How to play</a>
+        <a class="btn btn-ghost" href="daily.html">Daily</a>
+        <a class="btn btn-ghost" href="playground.html">Playground</a>
+        <a class="btn btn-ghost" href="badges.html">Badges</a>
         <a class="btn btn-ghost" href="index.html#contact">Contact</a>
       </nav>
       <div class="nav-right">
@@ -46,39 +47,61 @@
       </div>
     </section>
 
+    <div class="track-strip">
+      <div class="container">
+        <div class="track" id="track" aria-label="Level progress"></div>
+      </div>
+    </div>
+
     <div class="container">
       <div class="play" id="play">
         <article class="pixel-box lesson" id="lesson" data-reveal>
           <div id="lesson-body"></div>
-          <div class="task">
-            <h3><img data-sprite="scroll" data-scale="2" alt="">Your quest</h3>
-            <p id="task"></p>
-          </div>
-          <div>
-            <h2 style="font-size:16px;margin-bottom:10px">Tests</h2>
-            <ul class="tests" id="tests"></ul>
-          </div>
-          <div class="hint-box" id="hint-box"><p id="hint"></p></div>
         </article>
 
-        <section class="pixel-box editor-panel" aria-label="Code editor" data-reveal style="--d:100ms">
-          <div class="win-bar"><i></i><i></i><i></i><span class="file" id="file-name">quest.js</span></div>
-          <div class="editor">
-            <div class="gutter" id="gutter" aria-hidden="true">1</div>
-            <div class="code-area">
-              <pre aria-hidden="true"><code id="hl"></code></pre>
-              <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Code editor"></textarea>
+        <div class="q-col">
+          <section class="pixel-box q-card" id="q-card" aria-live="polite" aria-labelledby="q-title">
+            <div class="q-head">
+              <span class="eyebrow" id="q-step">Question 1 / 5</span>
+              <span class="tag" id="q-type">Quiz</span>
             </div>
-          </div>
-          <div class="editor-actions">
-            <button class="btn btn-start sm" type="button" id="run"><span class="t-label">Run ▶</span></button>
-            <button class="btn btn-code" type="button" id="hint-btn">Hint</button>
-            <button class="btn btn-code" type="button" id="reset-code">Reset</button>
-            <span class="spacer"></span>
-            <span class="kbd">Ctrl + Enter to run</span>
-          </div>
-          <div class="console" id="console" role="log" aria-live="polite"><div class="line muted">// Output appears here. Press Run when you are ready.</div></div>
-        </section>
+            <h2 id="q-title">Loading…</h2>
+            <p id="q-text"></p>
+            <pre class="q-code" id="q-code" hidden><code></code></pre>
+
+            <div id="quiz-area" hidden>
+              <div class="q-options" id="q-options" role="group" aria-label="Answers"></div>
+            </div>
+
+            <div id="code-q-area" hidden>
+              <h3 class="q-sub">Tests</h3>
+              <ul class="tests" id="tests"></ul>
+              <div class="hint-box" id="hint-box"><p id="hint"></p></div>
+            </div>
+
+            <div class="q-feedback" id="q-feedback" hidden></div>
+            <button class="btn btn-start sm q-next" type="button" id="q-next" hidden><span class="t-label">Continue ▶</span></button>
+          </section>
+
+          <section class="pixel-box editor-panel" id="editor-panel" aria-label="Code editor" hidden>
+            <div class="win-bar"><i></i><i></i><i></i><span class="file" id="file-name">quest.js</span></div>
+            <div class="editor">
+              <div class="gutter" id="gutter" aria-hidden="true">1</div>
+              <div class="code-area">
+                <pre aria-hidden="true"><code id="hl"></code></pre>
+                <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Code editor"></textarea>
+              </div>
+            </div>
+            <div class="editor-actions">
+              <button class="btn btn-start sm" type="button" id="run"><span class="t-label">Run ▶</span></button>
+              <button class="btn btn-code" type="button" id="hint-btn">Hint</button>
+              <button class="btn btn-code" type="button" id="reset-code">Reset</button>
+              <span class="spacer"></span>
+              <span class="kbd">Ctrl + Enter to run</span>
+            </div>
+            <div class="console" id="console" role="log" aria-live="polite"><div class="line muted">// Output appears here. Press Run when you are ready.</div></div>
+          </section>
+        </div>
       </div>
     </div>
 
@@ -91,7 +114,8 @@
         <div class="xp" id="win-xp">+100 XP</div>
         <div class="row">
           <a class="btn btn-start" id="win-next" href="levels.html"><span class="t-label">Next level</span></a>
-          <button class="btn btn-dark" type="button" id="win-stay">Stay here</button>
+          <a class="btn btn-dark" id="win-map" href="levels.html">World map</a>
+          <button class="btn btn-dark" type="button" id="win-stay" data-close>Stay here</button>
         </div>
       </div>
     </div>
@@ -107,7 +131,7 @@
         </div>
         <div>
           <h4>Play</h4>
-          <ul><li><a href="levels.html">World map</a></li><li><a href="level.html?id=1">Level 1</a></li><li><a href="index.html#how">How to play</a></li></ul>
+          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="certificate.html">Certificate</a></li></ul>
         </div>
         <div>
           <h4>Worlds</h4>
@@ -131,7 +155,11 @@
 
   <script src="js/core.js"></script>
   <script src="js/scene.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/levels-data.js"></script>
+  <script src="js/questions-data.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/cutscene.js"></script>
   <script src="js/level.js"></script>
 </body>
 </html>
