@@ -179,7 +179,8 @@
         const subject = "Bitwood — " + topic + " from " + name;
         const body = message + "\n\n— " + name + " (" + email + ")";
         window.location.href = "mailto:innababajanyan06@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-        ok.textContent = "We couldn't send it directly, so your email app is opening with the message ready — just press send! Or write to innababajanyan06@gmail.com.";
+        const gmail = "https://mail.google.com/mail/?view=cm&fs=1&to=innababajanyan06%40gmail.com&su=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+        ok.innerHTML = "We couldn't send it directly. Your email app may open with the message ready — or <a href=\"" + gmail + "\" target=\"_blank\" rel=\"noopener noreferrer\">send it with Gmail</a> instead.";
         ok.hidden = false;
       };
       if (!B.Cloud || !B.Cloud.enabled) { openMail(); return; }
