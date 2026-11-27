@@ -205,6 +205,7 @@
     document.querySelectorAll("[data-track-grid]").forEach(g => B.renderLevelCards(g, g.dataset.trackGrid));
     stats();
     contactForm();
+    document.querySelectorAll("[data-badge-count]").forEach(el => { el.textContent = B.BADGES.length; });
     // START takes returning players straight to their current level's map spot
     const done = Object.keys(B.Store.get().done).length;
     if (done > 0) {

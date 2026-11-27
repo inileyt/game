@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses — Bitwood Academy</title>
+  <meta name="description" content="Free beginner courses in Frontend, Backend and DevOps: 10 lessons each and a 20-question final exam.">
+  <meta name="theme-color" content="#020617">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Mulish:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-academy="hub">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav" aria-label="Main">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Bitwood home">
+        <img class="brand-mark" data-sprite="coin0" data-scale="4" alt="">
+        <span class="brand-name">Bitwood</span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a class="btn btn-ghost" href="index.html">Home</a>
+        <a class="btn btn-ghost" href="levels.html">Map</a>
+        <a class="btn btn-ghost is-active" href="courses.html" aria-current="page">Courses</a>
+        <a class="btn btn-ghost" href="daily.html">Daily</a>
+        <a class="btn btn-ghost" href="playground.html">Playground</a>
+        <a class="btn btn-ghost" href="badges.html">Badges</a>
+        <a class="btn btn-ghost" href="leaderboard.html">Leaderboard</a>
+        <a class="btn btn-ghost" href="index.html#contact">Contact</a>
+      </nav>
+      <div class="nav-right">
+        <span class="xp-chip" title="Your experience points"><img data-sprite="star" data-scale="2" alt=""><span data-xp>0</span> XP</span>
+        <a class="btn btn-start sm" href="levels.html"><span class="t-label">Play</span></a>
+        <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-head container">
+      <span class="eyebrow"><span class="blink-star" aria-hidden="true"></span>Bitwood Academy<span class="blink-star" aria-hidden="true"></span></span>
+      <h1>Courses</h1>
+      <p>Learn how real websites are built — from the buttons you click to the servers and clouds behind them.</p>
+      <ol class="ac-how" aria-label="How courses work">
+        <li><img data-sprite="scroll" data-scale="3" alt=""><span><b>10 lessons</b>Short reads with code examples</span></li>
+        <li><img data-sprite="star" data-scale="3" alt=""><span><b>2 checks each</b>+20 XP per lesson</span></li>
+        <li><img data-sprite="trophy" data-scale="3" alt=""><span><b>Final exam</b>20 questions · pass with 14</span></li>
+        <li><img data-sprite="medal" data-scale="3" alt=""><span><b>Certificate</b>+150 XP and a badge</span></li>
+      </ol>
+    </section>
+    <section class="container ac-hub" aria-label="All courses">
+      <div class="ac-grid" id="ac-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><img class="brand-mark" data-sprite="coin0" data-scale="4" alt=""><span class="brand-name">Bitwood</span></a>
+          <p style="margin-top:12px;font-size:15px;max-width:320px">A tiny pixel world for learning to code. Made for curious beginners of every age.</p>
+          <p style="margin-top:10px;font-size:15px">Founder: <b style="color:#f8fafc">Inna Babajanyan</b></p>
+        </div>
+        <div>
+          <h4>Play</h4>
+          <ul><li><a href="levels.html">World map</a></li><li><a href="daily.html">Daily challenge</a></li><li><a href="courses.html">Academy courses</a></li><li><a href="playground.html">Playground</a></li><li><a href="badges.html">Badges</a></li><li><a href="leaderboard.html">Leaderboard</a></li><li><a href="certificate.html">Certificate</a></li></ul>
+        </div>
+        <div>
+          <h4>Languages</h4>
+          <ul><li><a href="levels.html?track=js">JavaScript</a></li><li><a href="levels.html?track=go">Go</a></li><li><a href="levels.html?track=php">PHP</a></li></ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:innababajanyan06@gmail.com">innababajanyan06@gmail.com</a></li>
+            <li><a href="tel:+37493186006">+374 93 186006</a></li>
+            <li><a href="index.html#contact">Meet the founder</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="fine">
+        <p>© <span data-year>2026</span> Bitwood · Founded by Inna Babajanyan. All pixels hand-placed.</p>
+        <p>Made with <img class="heart pixelated" data-sprite="heart" data-scale="2" alt="love"> and JavaScript</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/core.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/courses/frontend.js"></script>
+  <script src="js/courses/backend.js"></script>
+  <script src="js/courses/devops.js"></script>
+  <script src="js/academy.js"></script>
+</body>
+</html>

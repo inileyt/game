@@ -218,6 +218,7 @@
       d.stats = d.stats || {};
       d.daily = d.daily || { done: {}, streak: 0, best: 0, count: 0, xp: 0, last: "" };
       d.daily.done = d.daily.done || {};
+      d.courses = d.courses || {};
       return d;
     },
     update(fn) { const d = this.get(); fn(d); this.write(d); return d; },
@@ -244,7 +245,16 @@
       Object.keys(d.done).forEach(k => { xp += d.done[k].xp || 0; });
       return xp;
     },
-    xp() { return this.levelXP() + (this.get().daily.xp || 0); },
+    /* Academy courses: 20 XP per finished lesson, 150 XP for passing a final exam */
+    courseXP() {
+      let xp = 0;
+      Object.values(this.get().courses).forEach(c => {
+        xp += Object.keys(c.lessons || {}).length * 20;
+        if (c.exam && c.exam.passed) xp += 150;
+      });
+      return xp;
+    },
+    xp() { return this.levelXP() + (this.get().daily.xp || 0) + this.courseXP(); },
     /* First level not yet cleared in a list of level ids (or the last one if all are done). */
     currentLevel(ids) {
       if (typeof ids === "number") { const n = ids; ids = []; for (let i = 1; i <= n; i++) ids.push(i); }
@@ -501,6 +511,10 @@
     { id: "go-explorer", name: "Go Explorer", icon: "gem", desc: "Clear all 5 Go levels.", test: d => range(11, 15).every(i => d.done[i]) },
     { id: "php-wizard", name: "PHP Wizard", icon: "potion", desc: "Clear all 5 PHP levels.", test: d => range(16, 20).every(i => d.done[i]) },
     { id: "polyglot", name: "Polyglot", icon: "star", desc: "Clear every level in all three languages.", test: d => range(1, 20).every(i => d.done[i]) },
+    { id: "frontend-grad", name: "Frontend Grad", icon: "gem", desc: "Pass the Frontend final exam.", test: d => passed(d, "frontend") },
+    { id: "backend-grad", name: "Backend Grad", icon: "potion", desc: "Pass the Backend final exam.", test: d => passed(d, "backend") },
+    { id: "devops-grad", name: "DevOps Grad", icon: "crown", desc: "Pass the DevOps final exam.", test: d => passed(d, "devops") },
+    { id: "scholar", name: "Scholar", icon: "scroll", desc: "Finish all 30 Academy lessons.", test: d => ["frontend", "backend", "devops"].every(c => Object.keys(((d.courses || {})[c] || {}).lessons || {}).length >= 10) },
     { id: "daily-hero", name: "Daily Hero", icon: "scroll", desc: "Solve a daily challenge.", test: d => (d.daily.count || 0) >= 1 },
     { id: "on-fire", name: "On Fire", icon: "heart", desc: "Reach a 3-day daily streak.", test: d => (d.daily.best || 0) >= 3 },
     { id: "tinkerer", name: "Tinkerer", icon: "potion", desc: "Run your own code in the Playground.", test: d => (d.stats.playRuns || 0) >= 1 },
@@ -508,6 +522,7 @@
     { id: "coin-collector", name: "Coin Collector", icon: "coin0", desc: "Collect 50 coins in the home page adventure.", test: d => (d.stats.coins || 0) >= 50 },
     { id: "graduate", name: "Graduate", icon: "medal", desc: "Download your Bitwood certificate.", test: d => (d.stats.certificates || 0) >= 1 }
   ];
+  function passed(d, c) { return !!(((d.courses || {})[c] || {}).exam || {}).passed; }
   function range(a, b) { const r = []; for (let i = a; i <= b; i++) r.push(i); return r; }
   function checkBadges() {
     const d = Store.get();
