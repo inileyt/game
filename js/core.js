@@ -232,16 +232,24 @@
     saveCode(id, code) { const d = this.get(); d.code[id] = code; this.write(d); },
     reset() { try { localStorage.removeItem(KEY); } catch (e) {} window.dispatchEvent(new Event("bitwood:reset")); },
     isDone(id) { return !!this.get().done[id]; },
-    isUnlocked(id) { return id === 1 || this.isDone(id - 1); },
+    /* The first level of every language track is open; others need the previous level of the same track. */
+    isUnlocked(id) {
+      const L = window.BITWOOD_LEVELS || [];
+      const lv = L.find(l => l.id === id), prev = L.find(l => l.id === id - 1);
+      if (!lv) return id === 1 || this.isDone(id - 1);
+      return !prev || prev.track !== lv.track || this.isDone(id - 1);
+    },
     levelXP() {
       const d = this.get(); let xp = 0;
       Object.keys(d.done).forEach(k => { xp += d.done[k].xp || 0; });
       return xp;
     },
     xp() { return this.levelXP() + (this.get().daily.xp || 0); },
-    currentLevel(total) {
-      for (let i = 1; i <= total; i++) if (!this.isDone(i)) return i;
-      return total;
+    /* First level not yet cleared in a list of level ids (or the last one if all are done). */
+    currentLevel(ids) {
+      if (typeof ids === "number") { const n = ids; ids = []; for (let i = 1; i <= n; i++) ids.push(i); }
+      for (const i of ids) if (!this.isDone(i)) return i;
+      return ids[ids.length - 1];
     }
   };
 
@@ -488,8 +496,11 @@
     { id: "first-steps", name: "First Steps", icon: "flag", desc: "Clear your first level.", test: d => Object.keys(d.done).length >= 1 },
     { id: "sharp-mind", name: "Sharp Mind", icon: "star", desc: "Clear any level with 3 stars.", test: d => Object.values(d.done).some(x => x.stars === 3) },
     { id: "knight", name: "Castle Knight", icon: "sword", desc: "Defeat the mid-boss in Object Castle (level 5).", test: d => !!d.done[5] },
-    { id: "world-tour", name: "World Tour", icon: "crown", desc: "Clear all 10 levels.", test: d => Object.keys(d.done).length >= 10 },
-    { id: "perfectionist", name: "Perfectionist", icon: "trophy", desc: "Get 3 stars on all 10 levels.", test: d => Object.keys(d.done).length >= 10 && Object.values(d.done).every(x => x.stars === 3) },
+    { id: "world-tour", name: "World Tour", icon: "crown", desc: "Clear all 10 JavaScript levels.", test: d => range(1, 10).every(i => d.done[i]) },
+    { id: "perfectionist", name: "Perfectionist", icon: "trophy", desc: "Get 3 stars on all 10 JavaScript levels.", test: d => range(1, 10).every(i => d.done[i] && d.done[i].stars === 3) },
+    { id: "go-explorer", name: "Go Explorer", icon: "gem", desc: "Clear all 5 Go levels.", test: d => range(11, 15).every(i => d.done[i]) },
+    { id: "php-wizard", name: "PHP Wizard", icon: "potion", desc: "Clear all 5 PHP levels.", test: d => range(16, 20).every(i => d.done[i]) },
+    { id: "polyglot", name: "Polyglot", icon: "star", desc: "Clear every level in all three languages.", test: d => range(1, 20).every(i => d.done[i]) },
     { id: "daily-hero", name: "Daily Hero", icon: "scroll", desc: "Solve a daily challenge.", test: d => (d.daily.count || 0) >= 1 },
     { id: "on-fire", name: "On Fire", icon: "heart", desc: "Reach a 3-day daily streak.", test: d => (d.daily.best || 0) >= 3 },
     { id: "tinkerer", name: "Tinkerer", icon: "potion", desc: "Run your own code in the Playground.", test: d => (d.stats.playRuns || 0) >= 1 },
@@ -497,6 +508,7 @@
     { id: "coin-collector", name: "Coin Collector", icon: "coin0", desc: "Collect 50 coins in the home page adventure.", test: d => (d.stats.coins || 0) >= 50 },
     { id: "graduate", name: "Graduate", icon: "medal", desc: "Download your Bitwood certificate.", test: d => (d.stats.certificates || 0) >= 1 }
   ];
+  function range(a, b) { const r = []; for (let i = a; i <= b; i++) r.push(i); return r; }
   function checkBadges() {
     const d = Store.get();
     const fresh = BADGES.filter(b => !d.badges[b.id] && b.test(d));

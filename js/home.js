@@ -201,8 +201,7 @@
     typewriter();
     hero();
     tabs();
-    const grid = document.getElementById("level-grid");
-    if (grid) B.renderLevelCards(grid);
+    document.querySelectorAll("[data-track-grid]").forEach(g => B.renderLevelCards(g, g.dataset.trackGrid));
     stats();
     contactForm();
     // START takes returning players straight to their current level's map spot

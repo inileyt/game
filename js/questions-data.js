@@ -230,6 +230,7 @@
 
   window.BITWOOD_LEVELS.forEach(lv => {
     const ex = EXTRA[lv.id];
+    if (lv.questions || !ex) return; // Go / PHP levels define their own questions
     const main = { type: "code", title: "Level challenge", task: lv.task, fn: lv.fn, starter: lv.starter, hint: lv.hint, tests: lv.tests, slug: lv.slug };
     const warm = Object.assign({ type: "code", slug: lv.slug + "-warmup" }, ex.warmup);
     const quiz = ex.quiz.map(q => Object.assign({ type: "quiz" }, q));
