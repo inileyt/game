@@ -173,12 +173,26 @@
         return;
       }
       const topic = form.elements.topic.value;
-      const subject = "Bitwood — " + topic + " from " + name;
-      const body = message + "\n\n— " + name + " (" + email + ")";
-      window.location.href = "mailto:innababajanyan06@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-      ok.textContent = "Your email app should open now with the message ready. Just press send! If nothing happens, write to innababajanyan06@gmail.com.";
-      ok.hidden = false;
-      if (B.Sound) B.Sound.play("pass");
+      const submit = form.querySelector('button[type="submit"]');
+      const label = submit.querySelector(".t-label");
+      const openMail = () => {
+        const subject = "Bitwood — " + topic + " from " + name;
+        const body = message + "\n\n— " + name + " (" + email + ")";
+        window.location.href = "mailto:innababajanyan06@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+        ok.textContent = "We couldn't send it directly, so your email app is opening with the message ready — just press send! Or write to innababajanyan06@gmail.com.";
+        ok.hidden = false;
+      };
+      if (!B.Cloud || !B.Cloud.enabled) { openMail(); return; }
+      submit.disabled = true; label.textContent = "Sending…";
+      B.Cloud.sendMessage({ name, email, topic, message }).then(() => {
+        form.reset();
+        ok.textContent = "Message sent! Thank you — Inna will reply to " + email + ".";
+        ok.hidden = false;
+        if (B.Sound) B.Sound.play("pass");
+      }).catch(e => {
+        console.warn("Bitwood message:", e && e.message);
+        openMail();
+      }).finally(() => { submit.disabled = false; label.textContent = "Send ✉"; });
     });
   }
 

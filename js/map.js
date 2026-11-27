@@ -266,7 +266,7 @@
     if (txt) txt.textContent = xp + " / " + total + " XP";
     const reset = document.getElementById("reset");
     if (reset) reset.addEventListener("click", () => {
-      if (window.confirm("Reset all progress? Your XP, stars and saved code will be erased.")) { B.Store.reset(); location.reload(); }
+      if (window.confirm("Reset all progress? Your XP, stars and saved code will be erased" + (B.Cloud && B.Cloud.user ? " — in the cloud too." : ".") )) { B.Store.reset(); const save = B.Cloud && B.Cloud.user ? B.Cloud.saveNow() : Promise.resolve(); save.finally(() => location.reload()); }
     });
   }
 

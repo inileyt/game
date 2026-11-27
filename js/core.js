@@ -206,8 +206,9 @@
     read() {
       try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
     },
-    write(data) {
+    write(data, opts) {
       try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* private mode */ }
+      if (!(opts && opts.silent)) window.dispatchEvent(new Event("bitwood:progress"));
     },
     get() {
       const d = this.read();
@@ -229,7 +230,7 @@
       return d;
     },
     saveCode(id, code) { const d = this.get(); d.code[id] = code; this.write(d); },
-    reset() { try { localStorage.removeItem(KEY); } catch (e) {} },
+    reset() { try { localStorage.removeItem(KEY); } catch (e) {} window.dispatchEvent(new Event("bitwood:reset")); },
     isDone(id) { return !!this.get().done[id]; },
     isUnlocked(id) { return id === 1 || this.isDone(id - 1); },
     levelXP() {
