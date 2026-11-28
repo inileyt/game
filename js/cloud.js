@@ -20,8 +20,8 @@
     const done = Object.values(d.done || {});
     return {
       xp: Math.min(1000000, B.Store.xp()),
-      stars: Math.min(60, done.reduce((s, x) => s + (x.stars || 0), 0)),
-      levels: Math.min(20, done.length),
+      stars: Math.min(105, done.reduce((s, x) => s + (x.stars || 0), 0)),
+      levels: Math.min(35, done.length),
       badges: Math.min(50, Object.keys(d.badges || {}).length)
     };
   }

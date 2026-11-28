@@ -1,4 +1,4 @@
-/* Course: Frontend development — 10 lessons + 20-question final exam. */
+/* Course: Frontend development — 13 lessons (10 here + 3 in extra-lessons.js) + a final exam question pool. */
 (window.BITWOOD_COURSES = window.BITWOOD_COURSES || []).push({
   id: "frontend",
   name: "Frontend",

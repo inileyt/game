@@ -5,22 +5,23 @@ A small website for learning to code, styled like a 2D pixel game.
 
 - **Home** (`index.html`) — animated 2D pixel adventure background (parallax sky, mountains, castle,
   forest, coins, slimes and a running hero — press <kbd>Space</kbd> or tap to jump) with a **START** button.
-- **World map** (`levels.html?track=js|go|php`) — one animated pixel island per language; levels unlock one after
+- **World map** (`levels.html?track=js|go|php|csharp|cpp|python`) — one animated pixel island per language; levels unlock one after
   another inside each language, and the first level of every language is open from the start.
-- **Level** (`level.html?id=1…20`) — a short lesson and **5 questions**. JavaScript levels mix quizzes with coding
-  tasks checked by hidden tests that run your code in a sandboxed Web Worker. Go and PHP can't run in a browser, so
+- **Level** (`level.html?id=1…35`) — a short lesson and **5 questions**. JavaScript levels mix quizzes with coding
+  tasks checked by hidden tests that run your code in a sandboxed Web Worker. Go, PHP, C#, C++ and Python can't run in a browser, so
   their levels use quizzes, **fill-in-the-blank** code and **build-the-program** line puzzles, all checked instantly. A pixel hero walks along the
   quest track after every answer; after question 5 he walks into a **portal** that takes you to the next level.
 - **Bitwood Academy** (`courses.html`) — 8 free courses: **Frontend**, **Backend**, **DevOps**, **Git & GitHub**,
-  **Python**, **React**, **Cybersecurity** and **AI basics**. Each has 10 lessons (explanations, code examples,
-  **animated pixel diagrams**, key points and 2 check-questions, +20 XP each) and a **20-question final exam** that
+  **Python**, **React**, **Cybersecurity** and **AI basics**. Each has 13 lessons (explanations, code examples,
+  **animated pixel diagrams**, key points and 2 check-questions, +20 XP each) and a **20-question final exam** (drawn at random from a pool of 23) that
   unlocks after all lessons (pass with 14/20 → +150 XP, a badge and a course certificate). Options are shuffled
-  every time. A **⏱ timed challenge** (20 questions in 10 minutes) puts fast passes on a per-course speed leaderboard.
+  every time. The Academy pages have their own purple "night library" look and an animated pixel
+  classroom (a teacher at the chalkboard, students coding, reading and thinking). A **⏱ timed challenge** (20 questions in 10 minutes) puts fast passes on a per-course speed leaderboard.
 - **Glossary** (`glossary.html`) — ~95 tech terms; words in lessons are clickable and show their definition.
 - **Daily challenge** (`daily.html`) — a new coding puzzle every day, +50 XP and a day-streak counter.
 - **Playground** (`playground.html`) — write any JavaScript, see the console, and paint 32×32 pixel art with
   `pixel(x, y, color)`; save it as a PNG.
-- **Badges** (`badges.html`) — 25 badges to collect.
+- **Badges** (`badges.html`) — 28 badges to collect.
 - **Certificate** (`certificate.html?track=…` / `?course=…`) — one per language (clear every level) and one per
   Academy course (pass the exam): type your name and download a pixel certificate.
 - **Sound** — 8-bit sound effects and an original chiptune made live with the Web Audio API (toggle buttons
@@ -60,6 +61,30 @@ A small website for learning to code, styled like a 2D pixel game.
 | 4 | Function Forge | Functions |
 | 5 | Array Archive | Arrays — boss |
 
+| # | C# (beginner) | Topic |
+|---|-------|-------|
+| 1 | Console Castle | Your first C# program |
+| 2 | Typed Tundra | Variables & types |
+| 3 | Branching Woods | If & loops |
+| 4 | Method Mesa | Methods |
+| 5 | List Nebula | Arrays & lists — boss |
+
+| # | C++ (beginner) | Topic |
+|---|-------|-------|
+| 1 | Stream Volcano | Your first C++ program |
+| 2 | Byte Caverns | Variables & types |
+| 3 | Loop Lagoon | If & loops |
+| 4 | Function Falls | Functions & references |
+| 5 | Vector Void | Vectors — boss |
+
+| # | Python (beginner) | Topic |
+|---|-------|-------|
+| 1 | Snake Village | Your first Python program |
+| 2 | F-String Forest | Variables & f-strings |
+| 3 | Indent Dunes | If & loops |
+| 4 | Def Glacier | Functions |
+| 5 | Dict Citadel | Lists & dictionaries — boss |
+
 Progress, XP and your code are saved in the browser (`localStorage`).
 
 ## Backend (Supabase)
@@ -76,7 +101,8 @@ One-time setup in the Supabase dashboard:
    If you already ran it before the Go and PHP levels were added, also run
    [`supabase/migrations/002_go_php_levels.sql`](supabase/migrations/002_go_php_levels.sql) and
    [`supabase/migrations/003_exam_records.sql`](supabase/migrations/003_exam_records.sql) once each
-   (003 adds the timed-exam speed leaderboard).
+   (003 adds the timed-exam speed leaderboard). After the C#, C++ and Python levels were added, also run
+   [`supabase/migrations/004_more_languages.sql`](supabase/migrations/004_more_languages.sql) once.
 2. **Authentication → URL Configuration**
    - Site URL: `https://inileyt.github.io/game/`
    - Redirect URLs: add `https://inileyt.github.io/game/**`

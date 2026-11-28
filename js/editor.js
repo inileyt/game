@@ -38,6 +38,8 @@
     sql: { comment: String.raw`--[^\n]*`, string: SQ, keyword: "SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|JOIN|ON|ORDER|BY|DESC|ASC|LIMIT|CREATE|TABLE|INDEX|AND|OR|NOT|NULL|PRIMARY|KEY|REFERENCES", builtin: "(?!)", special: "(?!)" },
     json: { comment: "(?!)", string: DQ, keyword: "(?!)", builtin: "true|false|null", special: "(?!)" },
     python: { comment: HASH_COMMENT, string: DQ + "|" + SQ, keyword: "def|return|if|elif|else|for|while|in|import|from|as|with|try|except|finally|class|break|continue|pass|and|or|not|lambda|is", builtin: "True|False|None|print|len|range|input|int|str|float|type|open|sorted|round", special: String.raw`\bf(?=["'])` },
+    csharp: { comment: String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`, string: String.raw`\$?` + DQ + "|" + SQ, keyword: "using|class|static|void|int|double|string|bool|char|var|new|return|if|else|for|foreach|in|while|do|public|private|namespace|const|List", builtin: "true|false|null|Console", special: "(?!)" },
+    cpp: { comment: String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`, string: DQ + "|" + SQ, keyword: "int|double|char|bool|void|return|if|else|for|while|do|auto|const|std|vector|string|using|namespace", builtin: "true|false|nullptr|cout|endl", special: String.raw`#include\s*<[^>\n]*>?|#include` },
     docker: { comment: HASH_COMMENT, string: DQ, keyword: "FROM|WORKDIR|COPY|RUN|EXPOSE|CMD|ENV|ARG|ENTRYPOINT", builtin: "(?!)", special: "(?!)" }
   });
   const TOKENS = {};

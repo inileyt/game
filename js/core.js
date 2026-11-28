@@ -473,7 +473,10 @@
     { id: "perfectionist", name: "Perfectionist", icon: "trophy", desc: "Get 3 stars on all 10 JavaScript levels.", test: d => range(1, 10).every(i => d.done[i] && d.done[i].stars === 3) },
     { id: "go-explorer", name: "Go Explorer", icon: "gem", desc: "Clear all 5 Go levels.", test: d => range(11, 15).every(i => d.done[i]) },
     { id: "php-wizard", name: "PHP Wizard", icon: "potion", desc: "Clear all 5 PHP levels.", test: d => range(16, 20).every(i => d.done[i]) },
-    { id: "polyglot", name: "Polyglot", icon: "star", desc: "Clear every level in all three languages.", test: d => range(1, 20).every(i => d.done[i]) },
+    { id: "csharp-champ", name: "C# Champion", icon: "shield", desc: "Clear all 5 C# levels.", test: d => range(21, 25).every(i => d.done[i]) },
+    { id: "cpp-crusher", name: "C++ Crusher", icon: "chip", desc: "Clear all 5 C++ levels.", test: d => range(26, 30).every(i => d.done[i]) },
+    { id: "snake-charmer", name: "Snake Charmer", icon: "sword", desc: "Clear all 5 Python levels.", test: d => range(31, 35).every(i => d.done[i]) },
+    { id: "polyglot", name: "Polyglot", icon: "star", desc: "Clear every level in all six languages.", test: d => (window.BITWOOD_LEVELS ? window.BITWOOD_LEVELS.map(l => l.id) : range(1, 35)).every(i => d.done[i]) },
     { id: "frontend-grad", name: "Frontend Grad", icon: "gem", desc: "Pass the Frontend final exam.", test: d => passed(d, "frontend") },
     { id: "backend-grad", name: "Backend Grad", icon: "potion", desc: "Pass the Backend final exam.", test: d => passed(d, "backend") },
     { id: "devops-grad", name: "DevOps Grad", icon: "crown", desc: "Pass the DevOps final exam.", test: d => passed(d, "devops") },
@@ -484,7 +487,7 @@
     { id: "ai-grad", name: "AI Explorer", icon: "chip", desc: "Pass the AI basics final exam.", test: d => passed(d, "ai") },
     { id: "speedrunner", name: "Speedrunner", icon: "heart", desc: "Pass a timed exam (20 questions in 10 minutes).", test: d => Object.values(d.courses || {}).some(c => c.timed && c.timed.best >= 14) },
     { id: "academy-master", name: "Academy Master", icon: "trophy", desc: "Pass all 8 Academy final exams.", test: d => ["frontend", "backend", "devops", "git", "python", "react", "security", "ai"].every(c => passed(d, c)) },
-    { id: "scholar", name: "Scholar", icon: "scroll", desc: "Finish every lesson of the Frontend, Backend and DevOps courses.", test: d => ["frontend", "backend", "devops"].every(c => Object.keys(((d.courses || {})[c] || {}).lessons || {}).length >= 10) },
+    { id: "scholar", name: "Scholar", icon: "scroll", desc: "Finish every lesson of the Frontend, Backend and DevOps courses.", test: d => ["frontend", "backend", "devops"].every(c => Object.keys(((d.courses || {})[c] || {}).lessons || {}).length >= courseSize(c)) },
     { id: "daily-hero", name: "Daily Hero", icon: "scroll", desc: "Solve a daily challenge.", test: d => (d.daily.count || 0) >= 1 },
     { id: "on-fire", name: "On Fire", icon: "heart", desc: "Reach a 3-day daily streak.", test: d => (d.daily.best || 0) >= 3 },
     { id: "tinkerer", name: "Tinkerer", icon: "potion", desc: "Run your own code in the Playground.", test: d => (d.stats.playRuns || 0) >= 1 },
@@ -492,6 +495,7 @@
     { id: "coin-collector", name: "Coin Collector", icon: "coin0", desc: "Collect 50 coins in the home page adventure.", test: d => (d.stats.coins || 0) >= 50 },
     { id: "graduate", name: "Graduate", icon: "medal", desc: "Download your Bitwood certificate.", test: d => (d.stats.certificates || 0) >= 1 }
   ];
+  function courseSize(id) { const c = (window.BITWOOD_COURSES || []).find(x => x.id === id); return c ? c.lessons.length : 13; }
   function passed(d, c) { return !!(((d.courses || {})[c] || {}).exam || {}).passed; }
   function range(a, b) { const r = []; for (let i = a; i <= b; i++) r.push(i); return r; }
   function checkBadges() {
