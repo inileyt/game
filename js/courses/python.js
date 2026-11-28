@@ -1,4 +1,4 @@
-/* Course: Python — 10 lessons + 20-question final exam. */
+/* Course: Python — 13 lessons (10 here + 3 in extra-lessons.js) + a final exam question pool. */
 (window.BITWOOD_COURSES = window.BITWOOD_COURSES || []).push({
   id: "python",
   name: "Python",

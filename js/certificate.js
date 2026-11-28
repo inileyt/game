@@ -36,7 +36,7 @@
       kicker: c.title.toUpperCase(),
       line1: "has completed the " + c.title + " course of Bitwood Academy —",
       line2: c.lessons.length + " lessons and a final exam on " + c.topics + ".",
-      stats: "Exam score: " + (e.best || 0) + " / " + c.exam.length + "     ·     " + (lessons * 20 + 150) + " XP     ·     " + fmtDate(e.at || Date.now()),
+      stats: "Exam score: " + (e.best || 0) + " / 20     ·     " + (lessons * 20 + 150) + " XP     ·     " + fmtDate(e.at || Date.now()),
       lockedText: lessons < c.lessons.length ? "Finish all " + c.lessons.length + " lessons, then pass the final exam." : "Pass the final exam (14 / 20) to unlock this certificate.",
       next: lessons < c.lessons.length ? { href: "lesson.html?c=" + c.id + "&l=" + nextLesson, label: "Go to lesson " + nextLesson } : { href: "exam.html?c=" + c.id, label: "Take the exam" }
     };

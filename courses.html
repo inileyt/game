@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Courses — Bitwood Academy</title>
-  <meta name="description" content="Free beginner courses in Frontend, Backend and DevOps: 10 lessons each and a 20-question final exam.">
+  <meta name="description" content="8 free beginner courses — Frontend, Backend, DevOps, Git, Python, React, Cybersecurity and AI: 13 lessons each and a 20-question final exam.">
   <meta name="theme-color" content="#020617">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,11 +45,14 @@
       <h1>Courses</h1>
       <p>Eight free courses — from websites and servers to Python, React, security and AI. Tap any <span class="gloss-demo">underlined word</span> in a lesson to see what it means, or open the <a href="glossary.html">glossary</a>.</p>
       <ol class="ac-how" aria-label="How courses work">
-        <li><img data-sprite="scroll" data-scale="3" alt=""><span><b>10 lessons</b>Short reads with code examples</span></li>
+        <li><img data-sprite="scroll" data-scale="3" alt=""><span><b>13 lessons</b>Short reads, code &amp; diagrams</span></li>
         <li><img data-sprite="star" data-scale="3" alt=""><span><b>2 checks each</b>+20 XP per lesson</span></li>
-        <li><img data-sprite="trophy" data-scale="3" alt=""><span><b>Final exam</b>20 questions · pass with 14</span></li>
+        <li><img data-sprite="trophy" data-scale="3" alt=""><span><b>Final exam</b>20 random questions · pass with 14</span></li>
         <li><img data-sprite="medal" data-scale="3" alt=""><span><b>Certificate</b>+150 XP and a badge</span></li>
       </ol>
+    </section>
+    <section class="container">
+      <div class="classroom-wrap is-tall"><span class="cr-label">Study hall</span><canvas class="classroom" data-classroom="full"></canvas></div>
     </section>
     <section class="container ac-hub" aria-label="All courses">
       <div class="ac-grid" id="ac-grid"></div>
@@ -89,6 +92,7 @@
   </footer>
 
   <script src="js/core.js"></script>
+  <script src="js/classroom.js"></script>
   <script src="js/scene.js"></script>
   <script src="js/audio.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
@@ -103,6 +107,7 @@
   <script src="js/courses/react.js"></script>
   <script src="js/courses/security.js"></script>
   <script src="js/courses/ai.js"></script>
+  <script src="js/courses/extra-lessons.js"></script>
   <script src="js/academy.js"></script>
 </body>
 </html>

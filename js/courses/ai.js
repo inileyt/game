@@ -1,4 +1,4 @@
-/* Course: AI basics — 10 lessons + 20-question final exam. */
+/* Course: AI basics — 13 lessons (10 here + 3 in extra-lessons.js) + a final exam question pool. */
 (window.BITWOOD_COURSES = window.BITWOOD_COURSES || []).push({
   id: "ai",
   name: "AI basics",

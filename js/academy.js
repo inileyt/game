@@ -14,7 +14,9 @@
   const lessonsDone = id => Object.keys(progress(id).lessons || {}).length;
   const isLessonDone = (id, n) => !!(progress(id).lessons || {})[n];
   const examInfo = id => progress(id).exam || null;
-  const examUnlocked = c => lessonsDone(c.id) >= c.lessons.length;
+  // unlocked after every lesson — or if the exam was already passed before new lessons were added
+  const examUnlocked = c => lessonsDone(c.id) >= c.lessons.length || !!(examInfo(c.id) && examInfo(c.id).passed);
+  const EXAM_SIZE = 20; // questions per attempt, drawn at random from the course's question pool
   function markLesson(id, n) {
     let fresh = false;
     B.Store.update(d => {
@@ -213,7 +215,7 @@
     document.title = c.name + " Final Exam — Bitwood Academy";
     const crumb = document.querySelector(".crumbs a");
     crumb.href = "course.html?c=" + c.id; crumb.textContent = "← " + c.title;
-    $("ac-kicker").textContent = c.name + " · Final exam · " + c.exam.length + " questions";
+    $("ac-kicker").textContent = c.name + " · Final exam · " + EXAM_SIZE + " questions";
     $("ac-title").textContent = c.title + " exam";
     banner(c, { heroFrac: 0.5 });
     const root = $("ac-exam");
@@ -231,8 +233,8 @@
       const e = examInfo(c.id);
       root.innerHTML = '<div class="pixel-box ac-panel ac-center"><img class="pixelated ac-big-ico" alt="" src="' + B.spriteURL("scroll", 6) + '">' +
         "<h2>Final exam: " + esc(c.title) + "</h2>" +
-        '<ul class="ac-rules"><li><b>' + c.exam.length + "</b> questions about all " + c.lessons.length + " lessons</li><li>Pass with <b>" + PASS + " / " + c.exam.length + "</b> (70%)</li><li>No time limit — you can go back and change answers</li><li>Passing gives <b>+" + EXAM_XP + " XP</b>, a badge and a certificate</li></ul>" +
-        (e ? '<p class="ac-best">Best score: <b>' + e.best + " / " + c.exam.length + "</b>" + (e.passed ? " · passed ✓" : "") + " · attempts: " + e.attempts + "</p>" : "") +
+        '<ul class="ac-rules"><li><b>' + EXAM_SIZE + "</b> random questions from a pool of " + c.exam.length + " about all " + c.lessons.length + " lessons</li><li>Pass with <b>" + PASS + " / " + EXAM_SIZE + "</b> (70%)</li><li>No time limit — you can go back and change answers</li><li>Passing gives <b>+" + EXAM_XP + " XP</b>, a badge and a certificate</li></ul>" +
+        (e ? '<p class="ac-best">Best score: <b>' + e.best + " / " + EXAM_SIZE + "</b>" + (e.passed ? " · passed ✓" : "") + " · attempts: " + e.attempts + "</p>" : "") +
         '<div class="ac-row"><button class="btn btn-start" type="button" id="ex-start"><span class="t-label">' + (e ? "Start again" : "Start exam") + "</span></button>" +
         '<button class="btn btn-code ex-timed-btn" type="button" id="ex-timed">⏱ Timed challenge · 10 min</button></div>' +
         '<p class="ac-hint">Timed challenge: the same 20 questions against the clock. Fast passes go on the speed leaderboard!</p></div>' +
@@ -260,7 +262,9 @@
     function start(isTimed) {
       timed = !!isTimed;
       clearInterval(timer);
-      qs = c.exam.map(q => Object.assign({}, q, shuffled(q))).sort(() => Math.random() - 0.5);
+      const pool = c.exam.slice();
+      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+      qs = pool.slice(0, EXAM_SIZE).map(q => Object.assign({}, q, shuffled(q)));
       answers = new Array(qs.length).fill(-1);
       cur = 0;
       root.innerHTML =
